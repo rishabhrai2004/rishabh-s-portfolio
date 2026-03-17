@@ -46,10 +46,10 @@ export default function Experience() {
               <h3 className="text-xl md:text-3xl font-display font-black uppercase tracking-tighter leading-none mb-4 text-accent">
                 {exp.company}
               </h3>
-              <h4 className="text-lg md:text-2xl font-body text-white/80 mb-6 md:mb-8 border-b border-white/10 pb-6 md:pb-8">
+              <h4 className="text-lg md:text-2xl font-body text-white mb-6 md:mb-8 border-b border-white/10 pb-6 md:pb-8">
                 {exp.role}
               </h4>
-              <p className="text-base md:text-lg text-white/60 leading-relaxed font-body italic">
+              <p className="text-base md:text-lg text-white/80 leading-relaxed font-body italic">
                 {exp.desc}
               </p>
             </motion.div>

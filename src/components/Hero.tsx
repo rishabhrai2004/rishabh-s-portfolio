@@ -28,13 +28,13 @@ export default function Hero() {
         style={{ y: y1, opacity }}
         className="absolute inset-0 flex flex-col justify-center items-center text-center z-10 pointer-events-none select-none w-full"
       >
-        <h1 className="font-display text-white/[0.03] text-[40px] sm:text-[60px] md:text-[140px] leading-[0.9] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden">
+        <h1 className="font-display text-white/[0.08] text-[40px] sm:text-[60px] md:text-[140px] lg:text-[180px] leading-[0.85] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden">
           RISHABH RAI
         </h1>
-        <h1 className="font-display text-white/[0.03] text-[40px] sm:text-[60px] md:text-[140px] leading-[0.9] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden sm:ml-[5vw]">
+        <h1 className="font-display text-white/[0.08] text-[40px] sm:text-[60px] md:text-[140px] lg:text-[180px] leading-[0.85] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden sm:ml-[5vw]">
           REDEFINING DATA
         </h1>
-        <h1 className="font-display text-white/[0.03] text-[40px] sm:text-[60px] md:text-[140px] leading-[0.9] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden sm:-ml-[5vw]">
+        <h1 className="font-display text-white/[0.08] text-[40px] sm:text-[60px] md:text-[140px] lg:text-[180px] leading-[0.85] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden sm:-ml-[5vw]">
           DRIVEN DECISIONS
         </h1>
       </motion.div>
@@ -70,7 +70,7 @@ export default function Hero() {
           <div className="w-8 md:w-12 h-0.5 bg-accent" />
           <span className="text-accent tracking-[0.2em] md:tracking-[0.3em] text-[10px] md:text-xs font-bold uppercase">Analytics Engineer</span>
         </div>
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-display italic font-medium leading-tight text-white/90 mb-6">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display italic font-medium leading-tight text-white mb-6">
           Architecting data flows that define the modern business tier.
         </h2>
       </motion.div>

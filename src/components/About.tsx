@@ -16,13 +16,13 @@ export default function About() {
             <span className="text-accent tracking-[0.2em] text-[10px] md:text-sm font-bold uppercase">01 // The Approach</span>
           </div>
 
-          <h2 className="text-3xl md:text-6xl leading-tight font-display tracking-tight mb-12 md:mb-16">
+          <h2 className="text-3xl md:text-6xl leading-tight font-display tracking-tight mb-12 md:mb-16 text-white">
             Turning raw datasets into <span className="text-accent">meaningful</span> business intelligence.
             <br className="hidden md:block" />
-            Building <span className="text-white/40">analytics pipelines</span> that power data-driven organizations.
+            Building <span className="text-white/60">analytics pipelines</span> that power data-driven organizations.
           </h2>
           
-          <div className="font-body text-base md:text-lg text-white/50 tracking-wide leading-relaxed max-w-3xl mx-auto">
+          <div className="font-body text-base md:text-lg text-white/80 tracking-wide leading-relaxed max-w-3xl mx-auto">
             <p className="mb-6">
               Rishabh Rai is a native data architect focusing on modern business intelligence layer deployment. At the intersection of deep analytical theory and robust data engineering, he standardizes enterprise data integration.
             </p>

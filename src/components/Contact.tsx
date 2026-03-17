@@ -34,7 +34,7 @@ export default function Contact() {
         </motion.div>
       </div>
 
-      <footer className="mt-auto w-full px-6 lg:px-12 py-12 flex flex-col md:flex-row justify-between items-center text-[10px] md:text-xs font-bold tracking-[0.3em] font-body uppercase text-white/30 z-20 gap-8">
+      <footer className="mt-auto w-full px-6 lg:px-12 py-12 flex flex-col md:flex-row justify-between items-center text-[10px] md:text-xs font-bold tracking-[0.3em] font-body uppercase text-white/50 z-20 gap-8">
         <p className="hover:text-white transition-colors cursor-default">© 2026 Rishabh Rai // RR.</p>
         <div className="flex gap-10">
           <a href="https://linkedin.com/in/rishabh-rai-961937280/" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-all duration-300 hover:tracking-[0.4em]">LinkedIn</a>

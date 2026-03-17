@@ -46,7 +46,7 @@ export default function Navbar() {
                 <li key={link.name}>
                   <a 
                     href={link.href} 
-                    className="text-white/60 hover:text-accent text-[11px] uppercase tracking-[0.3em] font-bold transition-all duration-300"
+                    className="text-white/80 hover:text-accent text-[11px] uppercase tracking-[0.3em] font-bold transition-all duration-300"
                   >
                     {link.name}
                   </a>
@@ -58,7 +58,7 @@ export default function Navbar() {
                 href="/Rishabh_Rai_Resume.pdf" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-3 border border-white/10 text-white/80 text-[11px] uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white/5 hover:border-white/20 transition-all duration-300"
+                className="px-6 py-3 border border-white/20 text-white text-[11px] uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white/5 hover:border-white/40 transition-all duration-300"
               >
                 Resume
               </a>
