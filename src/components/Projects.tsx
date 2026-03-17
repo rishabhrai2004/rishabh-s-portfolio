@@ -74,7 +74,16 @@ export default function Projects() {
   );
 }
 
-function ProjectCard({ project, idx }: { project: any, idx: number }) {
+interface Project {
+  id: number;
+  title: string;
+  description: string;
+  tools: string[];
+  link: string;
+  type: string;
+}
+
+function ProjectCard({ project, idx }: { project: Project, idx: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.98, y: 40 }}
