@@ -4,16 +4,6 @@ import { motion } from 'framer-motion';
 
 const experiences = [
   {
-    company: 'KIIT ENTREPRENEURSHIP CELL',
-    role: 'DIRECTOR',
-    desc: 'Directed marketing strategy for a 10,000+ member entrepreneurship ecosystem, building a centralized campaign framework that scaled event outreach, improved registration funnels, and introduced data-driven performance tracking across entrepreneurship initiatives.'
-  },
-  {
-    company: 'KIIT INTERNATIONAL MODEL UNITED NATIONS',
-    role: 'DEPUTY DIRECTOR',
-    desc: 'Led operational planning for one of Asia’s largest Model United Nations conferences, coordinating cross-functional volunteer teams and implementing structured systems for seamless large-scale conference execution.'
-  },
-  {
     company: 'INDIAN OIL CORPORATION',
     role: 'DATA ANALYTICS INTERN',
     desc: 'Analyzed massive refinery operational datasets deploying Python/SQL stacks to establish automated Power BI telemetry reporting frameworks.'
@@ -22,6 +12,16 @@ const experiences = [
     company: 'MKTEA',
     role: 'HR DATA INTERN',
     desc: 'Synthesized deeply-nested HR pipeline telemetry for over 20,000 employees. Delivered executive recruitment retention insights reducing overhead variance.'
+  },
+  {
+    company: 'KIIT ENTREPRENEURSHIP CELL',
+    role: 'DIRECTOR',
+    desc: 'Directed marketing strategy for a 10,000+ member entrepreneurship ecosystem, building a centralized campaign framework that scaled event outreach, improved registration funnels, and introduced data-driven performance tracking across entrepreneurship initiatives.'
+  },
+  {
+    company: 'KIIT INTERNATIONAL MODEL UNITED NATIONS',
+    role: 'DEPUTY DIRECTOR',
+    desc: 'Led operational planning for one of Asia’s largest Model United Nations conferences, coordinating cross-functional volunteer teams and implementing structured systems for seamless large-scale conference execution.'
   }
 ];
 
