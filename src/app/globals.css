@@ -2,33 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #0D1117;
-  --foreground: #ffffff;
+@layer base {
+  :root {
+    --background: #030712;
+    --foreground: #F9FAFB;
+    --accent: #C6FF00;
+    --accent-muted: rgba(198, 255, 0, 0.1);
+    --card: rgba(31, 41, 55, 0.2);
+    --card-hover: rgba(31, 41, 55, 0.4);
+    --border: rgba(255, 255, 255, 0.05);
+  }
+
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  overflow-x: hidden;
-  /* Smooth scrolling behaviour */
-  scroll-behavior: smooth;
-  /* Anti-aliasing for typography */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer components {
+  .glass {
+    @apply backdrop-blur-xl border border-white/5 bg-white/5;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-500;
+  }
 }
 
-/* Hide scrollbar for a cleaner look but keep functionality */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #0D1117;
+  background: var(--background);
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #1F2937;
-  border-radius: 4px;
+  background: #374151;
+  border-radius: 10px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #C6FF00;
+  background: var(--accent);
+}
+
+/* Selection Highlight */
+::selection {
+  background: var(--accent);
+  color: #000000;
 }

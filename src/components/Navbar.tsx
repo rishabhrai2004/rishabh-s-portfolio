@@ -27,8 +27,8 @@ export default function Navbar() {
   return (
     <>
       <header 
-        className={`fixed top-0 w-full z-50 backdrop-blur-md bg-black/30 border-b border-white/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          scrolled ? 'py-4' : 'py-8'
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          scrolled ? 'py-4 glass bg-black/40' : 'py-8 bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex justify-between items-center">
@@ -46,25 +46,25 @@ export default function Navbar() {
                 <li key={link.name}>
                   <a 
                     href={link.href} 
-                    className="text-white/60 hover:text-white text-[13px] uppercase tracking-[0.2em] font-medium transition-colors"
+                    className="text-white/60 hover:text-accent text-[11px] uppercase tracking-[0.3em] font-bold transition-all duration-300"
                   >
                     {link.name}
                   </a>
                 </li>
               ))}
             </ul>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 ml-4">
               <a 
                 href="/Rishabh_Rai_Resume.pdf" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-3.5 border border-white/20 text-white text-[13px] uppercase tracking-[0.15em] font-bold rounded-full hover:bg-white/10 transition-all hover:scale-105 duration-300"
+                className="px-6 py-3 border border-white/10 text-white/80 text-[11px] uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white/5 hover:border-white/20 transition-all duration-300"
               >
                 Resume
               </a>
               <a 
                 href="#projects" 
-                className="px-8 py-3.5 bg-accent text-black text-[13px] uppercase tracking-[0.15em] font-bold rounded-full hover:bg-white transition-all hover:scale-105 duration-300 shadow-[0_0_20px_rgba(198,255,0,0.2)]"
+                className="px-6 py-3 bg-accent text-black text-[11px] uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white transition-all hover:scale-105 duration-300 shadow-[0_0_20px_var(--accent-muted)]"
               >
                 View Work
               </a>
@@ -73,7 +73,7 @@ export default function Navbar() {
 
           {/* Mobile Toggle */}
           <button 
-            className="md:hidden text-white z-50 p-2"
+            className="md:hidden text-white z-50 p-2 hover:text-accent transition-colors"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -89,44 +89,48 @@ export default function Navbar() {
             animate={{ opacity: 1, clipPath: 'circle(150% at 100% 0)' }}
             exit={{ opacity: 0, clipPath: 'circle(0% at 100% 0)' }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-40 bg-[#0D1117] flex flex-col justify-center items-center"
+            className="fixed inset-0 z-40 bg-[#030712] flex flex-col justify-center items-center p-6"
           >
-            <ul className="flex flex-col items-center gap-10">
+            <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
+            
+            <ul className="flex flex-col items-center gap-8 relative z-10 w-full max-w-xs">
               {links.map((link, idx) => (
                 <motion.li 
                   key={link.name}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * idx + 0.3 }}
+                  className="w-full text-center"
                 >
                   <a 
                     href={link.href} 
                     onClick={closeMenu} 
-                    className="text-white hover:text-accent font-display italic text-5xl transition-colors"
+                    className="block text-white hover:text-accent font-display italic text-5xl md:text-6xl transition-all duration-500 hover:tracking-widest"
                   >
                     {link.name}
                   </a>
                 </motion.li>
               ))}
+              
               <motion.li
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="mt-8 flex flex-col items-center gap-6"
+                className="mt-12 flex flex-col items-center gap-4 w-full"
               >
                 <a 
                   href="/Rishabh_Rai_Resume.pdf" 
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeMenu}
-                  className="px-10 py-4 border border-white/20 text-white text-sm uppercase tracking-[0.2em] font-bold rounded-full"
+                  className="w-full py-4 text-center border border-white/10 text-white/70 text-xs uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white/5 transition-colors"
                 >
-                  Download Resume
+                  Resume
                 </a>
                 <a 
                   href="#projects" 
                   onClick={closeMenu}
-                  className="px-10 py-4 bg-accent text-black text-sm uppercase tracking-[0.2em] font-bold rounded-full"
+                  className="w-full py-4 text-center bg-accent text-black text-xs uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white transition-all shadow-[0_0_30px_var(--accent-muted)]"
                 >
                   View Work
                 </a>
