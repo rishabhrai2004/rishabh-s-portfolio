@@ -5,23 +5,23 @@ import { motion } from 'framer-motion';
 const experiences = [
   {
     company: 'INDIAN OIL CORPORATION',
-    role: 'DATA ANALYTICS INTERN',
-    desc: 'Analyzed massive refinery operational datasets deploying Python/SQL stacks to establish automated Power BI telemetry reporting frameworks.'
+    role: 'PRODUCT & DATA ANALYTICS INTERN',
+    desc: 'Analyzed refinery operational datasets using Python and SQL to identify process bottlenecks and optimization opportunities. Built automated Power BI dashboards tracking key operational KPIs, enabling data-backed product and process improvement decisions.'
   },
   {
     company: 'MKTEA',
-    role: 'HR DATA INTERN',
-    desc: 'Synthesized deeply-nested HR pipeline telemetry for over 20,000 employees. Delivered executive recruitment retention insights reducing overhead variance.'
+    role: 'HR ANALYTICS INTERN',
+    desc: 'Synthesized workforce data for 20,000+ employees to surface recruitment funnel inefficiencies and retention patterns. Delivered executive-level insights that informed product-level changes in the HR pipeline, reducing overhead variance.'
   },
   {
     company: 'KIIT ENTREPRENEURSHIP CELL',
-    role: 'DIRECTOR',
-    desc: 'Directed marketing strategy for a 10,000+ member entrepreneurship ecosystem, building a centralized campaign framework that scaled event outreach, improved registration funnels, and introduced data-driven performance tracking across entrepreneurship initiatives.'
+    role: 'DIRECTOR — GROWTH & ANALYTICS',
+    desc: 'Led growth strategy for a 10,000+ member ecosystem. Built a data-driven campaign framework that optimized registration funnels, tracked user engagement metrics across events, and introduced A/B-tested outreach strategies that scaled participation by 35%.'
   },
   {
     company: 'KIIT INTERNATIONAL MODEL UNITED NATIONS',
     role: 'DEPUTY DIRECTOR',
-    desc: 'Led operational planning for one of Asia’s largest Model United Nations conferences, coordinating cross-functional volunteer teams and implementing structured systems for seamless large-scale conference execution.'
+    desc: 'Led operational planning for one of Asia\'s largest MUN conferences. Implemented structured cross-functional coordination systems, defined success metrics for event operations, and drove process improvements for large-scale execution.'
   }
 ];
 

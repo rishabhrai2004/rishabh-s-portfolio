@@ -28,7 +28,7 @@ export default function Contact() {
           >
             LET&apos;S TALK
             <br />
-            <span className="text-white/10 group-hover:text-white/20 transition-colors duration-700">DATA</span>
+            <span className="text-white/10 group-hover:text-white/20 transition-colors duration-700">PRODUCT</span>
             <div className="absolute -inset-4 md:-inset-8 border border-accent/0 group-hover:border-accent/20 transition-all duration-700 rounded-full scale-110 group-hover:scale-100 opacity-0 group-hover:opacity-100 pointer-events-none" />
           </a>
         </motion.div>

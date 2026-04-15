@@ -6,17 +6,17 @@ import { ExternalLink, Github } from 'lucide-react';
 const analyticsProjects = [
   {
     id: 1,
-    title: 'RETAIL ANALYTICS PIPELINE',
-    description: 'Cloud-based retail analytics framework deploying Azure SQL to standardize cross-platform product datasets. Enables dynamic Power BI dashboards that surface actionable margin and pricing insights.',
-    tools: ['Azure SQL', 'Power BI', 'DAX'],
+    title: 'RETAIL PRODUCT ANALYTICS',
+    description: 'End-to-end product analytics framework for retail — standardized cross-platform product datasets via Azure SQL and built Power BI dashboards that track pricing strategy impact, margin trends, and product performance KPIs.',
+    tools: ['Azure SQL', 'Power BI', 'DAX', 'Product KPIs'],
     link: 'https://github.com/rishabhrai2004/rishabh-s-portfolio',
     type: 'Github'
   },
   {
     id: 2,
     title: 'AGRI-YIELD PREDICTION HUB',
-    description: 'High-throughput agricultural analytics pipeline using Snowflake and AWS S3 to process environmental and telemetry datasets. Produces geospatial productivity insights and predictive crop yield metrics.',
-    tools: ['AWS S3', 'Snowflake', 'SQL', 'Power BI'],
+    description: 'Product analytics pipeline for agricultural insights — processed environmental and telemetry datasets via Snowflake and AWS S3 to deliver geospatial productivity metrics and predictive yield forecasting for product decision-making.',
+    tools: ['AWS S3', 'Snowflake', 'SQL', 'Predictive Analytics'],
     link: 'https://github.com/rishabhrai2004/rishabh-s-portfolio',
     type: 'Github'
   }
@@ -25,17 +25,17 @@ const analyticsProjects = [
 const aiProjects = [
   {
     id: 3,
-    title: 'CareerOS — AI Career Intelligence',
-    description: 'AI-powered career intelligence platform built with LLM APIs to forecast job market demand, analyze skill gaps, and generate personalized learning and salary growth pathways.',
-    tools: ['LLM APIs', 'AI Intelligence', 'Full Stack'],
+    title: 'CareerOS — AI Product Intelligence',
+    description: 'Product-driven career intelligence platform — uses LLM APIs to forecast market demand, surface skill-gap opportunities, and generate personalized growth pathways. Designed with a product-first approach focused on user retention and engagement metrics.',
+    tools: ['LLM APIs', 'Product Strategy', 'User Metrics', 'Full Stack'],
     link: 'https://career-voyage-ai-12.lovable.app/',
     type: 'External'
   },
   {
     id: 4,
     title: 'AI Startup Idea Validator',
-    description: 'AI platform that automates startup validation through market analysis, competitor benchmarking, and product-market fit evaluation using structured intelligence pipelines.',
-    tools: ['LLMs', 'Market Analysis', 'Data Pipelines'],
+    description: 'Product validation engine that automates market sizing, competitor benchmarking, and product-market fit analysis. Structured to help founders make data-informed go/no-go decisions on new product bets.',
+    tools: ['LLMs', 'Market Analysis', 'PMF Framework', 'Data Pipelines'],
     link: 'https://notion-insight-ai.lovable.app/',
     type: 'External'
   }
@@ -51,7 +51,7 @@ export default function Projects() {
         </div>
 
         <div className="mb-10 border-b border-white/10 pb-4">
-          <h3 className="text-xl md:text-2xl font-serif italic text-white/50">Data Analytics</h3>
+          <h3 className="text-xl md:text-2xl font-serif italic text-white/50">Product & Data Analytics</h3>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8 md:gap-16 mb-24 md:mb-32">
@@ -61,7 +61,7 @@ export default function Projects() {
         </div>
 
         <div className="mb-10 border-b border-white/10 pb-4">
-          <h3 className="text-xl md:text-2xl font-serif italic text-white/50">AI &amp; Product Engineering</h3>
+          <h3 className="text-xl md:text-2xl font-serif italic text-white/50">Product Strategy &amp; AI</h3>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8 md:gap-16">

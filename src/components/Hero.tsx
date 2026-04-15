@@ -28,14 +28,14 @@ export default function Hero() {
         style={{ y: y1, opacity }}
         className="absolute inset-0 flex flex-col justify-center items-center text-center z-10 pointer-events-none select-none w-full"
       >
-        <h1 className="font-display text-white/[0.08] text-[40px] sm:text-[60px] md:text-[140px] lg:text-[180px] leading-[0.85] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden">
+        <h1 className="font-display text-white/[0.12] md:text-white/[0.08] text-[48px] sm:text-[80px] md:text-[140px] lg:text-[180px] leading-[0.85] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden">
           RISHABH RAI
         </h1>
-        <h1 className="font-display text-white/[0.08] text-[40px] sm:text-[60px] md:text-[140px] lg:text-[180px] leading-[0.85] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden sm:ml-[5vw]">
-          REDEFINING DATA
+        <h1 className="font-display text-white/[0.12] md:text-white/[0.08] text-[48px] sm:text-[80px] md:text-[140px] lg:text-[180px] leading-[0.85] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden sm:ml-[5vw]">
+          PRODUCT x DATA
         </h1>
-        <h1 className="font-display text-white/[0.08] text-[40px] sm:text-[60px] md:text-[140px] lg:text-[180px] leading-[0.85] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden sm:-ml-[5vw]">
-          DRIVEN DECISIONS
+        <h1 className="font-display text-white/[0.12] md:text-white/[0.08] text-[48px] sm:text-[80px] md:text-[140px] lg:text-[180px] leading-[0.85] whitespace-nowrap text-center font-bold tracking-tighter w-full overflow-hidden sm:-ml-[5vw]">
+          DRIVEN STRATEGY
         </h1>
       </motion.div>
 
@@ -59,21 +59,17 @@ export default function Hero() {
       </div>
 
       {/* Hero Overlay Text */}
-      <motion.div 
-        style={{ y: y1 }}
-        className="absolute bottom-12 sm:bottom-16 md:bottom-24 left-6 sm:left-12 md:left-24 z-40 max-w-[90vw] sm:max-w-xl"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.8 }}
+      <div 
+        className="absolute bottom-20 sm:bottom-16 md:bottom-24 left-6 sm:left-12 md:left-24 z-50 max-w-[90vw] sm:max-w-xl"
       >
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 md:w-12 h-0.5 bg-accent" />
-          <span className="text-accent tracking-[0.2em] md:tracking-[0.3em] text-[10px] md:text-xs font-bold uppercase">Analytics Engineer</span>
+          <span className="text-accent tracking-[0.2em] md:tracking-[0.3em] text-[12px] md:text-sm font-bold uppercase drop-shadow-md">Product &amp; Data Analyst</span>
         </div>
-        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display italic font-medium leading-tight text-white mb-6">
-          Architecting data flows that define the modern business tier.
+        <h2 className="text-3xl sm:text-5xl md:text-6xl font-display italic font-medium leading-tight text-white mb-6 drop-shadow-lg">
+          Bridging product intuition with data-driven precision.
         </h2>
-      </motion.div>
+      </div>
     </section>
   );
 }

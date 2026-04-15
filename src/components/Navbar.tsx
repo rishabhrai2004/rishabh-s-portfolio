@@ -55,14 +55,6 @@ export default function Navbar() {
             </ul>
             <div className="flex items-center gap-4 ml-4">
               <a 
-                href="/Rishabh_Rai_Resume.pdf" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 border border-white/20 text-white text-[11px] uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white/5 hover:border-white/40 transition-all duration-300"
-              >
-                Resume
-              </a>
-              <a 
                 href="#projects" 
                 className="px-6 py-3 bg-accent text-black text-[11px] uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white transition-all hover:scale-105 duration-300 shadow-[0_0_20px_var(--accent-muted)]"
               >
@@ -118,15 +110,6 @@ export default function Navbar() {
                 transition={{ delay: 0.6 }}
                 className="mt-12 flex flex-col items-center gap-4 w-full"
               >
-                <a 
-                  href="/Rishabh_Rai_Resume.pdf" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={closeMenu}
-                  className="w-full py-4 text-center border border-white/10 text-white/70 text-xs uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white/5 transition-colors"
-                >
-                  Resume
-                </a>
                 <a 
                   href="#projects" 
                   onClick={closeMenu}

@@ -10,8 +10,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'Rishabh Rai | Analytics Professional',
-  description: 'Data Analyst & Analytics Engineer portfolio.',
+  title: 'Rishabh Rai | Product & Data Analyst',
+  description: 'Product Analyst & Data Analyst portfolio — bridging product strategy with data-driven decision making.',
 };
 
 export default function RootLayout({

@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+import LoadingScreen from '@/components/LoadingScreen';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import About from '@/components/About';
@@ -9,20 +13,33 @@ import Contact from '@/components/Contact';
 import ScrollyCanvas from '@/components/ScrollyCanvas';
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(true);
+
   return (
-    <main className="min-h-screen bg-background w-full overflow-x-hidden selection:bg-accent selection:text-black">
-      <ScrollyCanvas />
+    <>
+      <LoadingScreen onComplete={() => setIsLoading(false)} />
       
-      <div className="relative z-10">
-        <Navbar />
-        <Hero />
-        <About />
-        <Skills />
-        <Projects />
-        <Experience />
-        <Certifications />
-        <Contact />
-      </div>
-    </main>
+      <main
+        className="min-h-screen bg-background w-full overflow-x-hidden selection:bg-accent selection:text-black"
+        style={{
+          opacity: isLoading ? 0 : 1,
+          transition: 'opacity 0.8s ease-in-out',
+          pointerEvents: isLoading ? 'none' : 'auto',
+        }}
+      >
+        {!isLoading && <ScrollyCanvas />}
+        
+        <div className="relative z-10">
+          <Navbar />
+          <Hero />
+          <About />
+          <Skills />
+          <Projects />
+          <Experience />
+          <Certifications />
+          <Contact />
+        </div>
+      </main>
+    </>
   );
 }

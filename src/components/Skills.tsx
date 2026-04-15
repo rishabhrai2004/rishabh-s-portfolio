@@ -1,28 +1,38 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Database, Code2, LineChart, Cloud } from 'lucide-react';
+import { Database, Code2, LineChart, Cloud, Target, BarChart3 } from 'lucide-react';
 
 const categories = [
   {
-    title: 'PROGRAMMING',
-    icon: <Code2 className="w-8 h-8 text-accent" />,
-    skills: ['Python', 'SQL']
+    title: 'PRODUCT ANALYTICS',
+    icon: <Target className="w-8 h-8 text-accent" />,
+    skills: ['A/B Testing', 'Funnel Analysis', 'KPI Frameworks', 'PRDs & Specs']
   },
   {
-    title: 'ANALYTICS',
-    icon: <Database className="w-8 h-8 text-accent" />,
-    skills: ['Pandas', 'NumPy', 'Statistical Analysis']
+    title: 'DATA & PROGRAMMING',
+    icon: <Code2 className="w-8 h-8 text-accent" />,
+    skills: ['Python', 'SQL', 'Pandas', 'NumPy']
   },
   {
     title: 'VISUALIZATION',
     icon: <LineChart className="w-8 h-8 text-accent" />,
-    skills: ['Power BI', 'DAX', 'Dashboard Design']
+    skills: ['Power BI', 'Mixpanel', 'Amplitude', 'Dashboard Design']
   },
   {
-    title: 'CLOUD DATA',
+    title: 'METRICS & REPORTING',
+    icon: <BarChart3 className="w-8 h-8 text-accent" />,
+    skills: ['Cohort Analysis', 'Retention Metrics', 'Growth Modeling', 'Executive Reporting']
+  },
+  {
+    title: 'CLOUD & INFRA',
     icon: <Cloud className="w-8 h-8 text-accent" />,
     skills: ['AWS S3', 'Snowflake', 'Azure SQL']
+  },
+  {
+    title: 'STRATEGY & TOOLS',
+    icon: <Database className="w-8 h-8 text-accent" />,
+    skills: ['Jira', 'Notion', 'Figma', 'Competitive Analysis']
   }
 ];
 
@@ -37,7 +47,7 @@ export default function Skills() {
           <div className="h-px bg-white/10 flex-1 ml-8" />
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {categories.map((cat, idx) => (
             <motion.div
               key={cat.title}

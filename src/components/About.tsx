@@ -17,17 +17,17 @@ export default function About() {
           </div>
 
           <h2 className="text-3xl md:text-6xl leading-tight font-display tracking-tight mb-12 md:mb-16 text-white">
-            Turning raw datasets into <span className="text-accent">meaningful</span> business intelligence.
+            Turning product questions into <span className="text-accent">measurable</span> outcomes.
             <br className="hidden md:block" />
-            Building <span className="text-white/60">analytics pipelines</span> that power data-driven organizations.
+            Combining <span className="text-white/60">product thinking</span> with deep analytical rigor.
           </h2>
           
           <div className="font-body text-base md:text-lg text-white/80 tracking-wide leading-relaxed max-w-3xl mx-auto">
             <p className="mb-6">
-              Rishabh Rai is a native data architect focusing on modern business intelligence layer deployment. At the intersection of deep analytical theory and robust data engineering, he standardizes enterprise data integration.
+              Rishabh Rai operates at the intersection of product strategy and data analytics. He translates ambiguous product questions into structured experiments, actionable metrics, and growth frameworks &mdash; enabling teams to ship with confidence and iterate with clarity.
             </p>
             <p>
-              His current portfolio highlights significant performance throughput on predictive modelling, cloud-storage optimization, and executive-level Power BI reporting frameworks.
+              His portfolio spans end-to-end product analytics &mdash; from defining KPIs and building dashboards to running A/B test analyses, user funnel diagnostics, and executive-level reporting that shapes roadmap priorities.
             </p>
           </div>
         </motion.div>
