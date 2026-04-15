@@ -45,7 +45,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   }, [handleComplete]);
 
   // Random initial positions for each letter (falling from different spots)
-  const getLetterEntrance = (index: number, total: number) => {
+  const getLetterEntrance = (index: number) => {
     const angles = [-35, 20, -15, 30, -25, 10, -20, 25];
     const offsets = [-200, 150, -100, 250, -180, 120, -220, 180];
     return {
@@ -135,7 +135,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                     textShadow: phase === 'holding' ? '0 0 40px var(--accent-muted)' : 'none',
                     display: 'inline-block',
                   }}
-                  initial={getLetterEntrance(i, NAME_TOP.length)}
+                  initial={getLetterEntrance(i)}
                   animate={
                     phase === 'exiting'
                       ? getLetterExit(i)
@@ -172,7 +172,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                     color: 'var(--accent)',
                     display: 'inline-block',
                   }}
-                  initial={getLetterEntrance(i + NAME_TOP.length, NAME_BOTTOM.length)}
+                  initial={getLetterEntrance(i + NAME_TOP.length)}
                   animate={
                     phase === 'exiting'
                       ? getLetterExit(i + NAME_TOP.length)

@@ -148,7 +148,8 @@ export default function ScrollyCanvas() {
       cancelled = true;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       // Clean up bitmaps
-      bitmapsRef.current.forEach(b => b?.close());
+      const currentBitmaps = bitmapsRef.current;
+      currentBitmaps.forEach(b => b?.close());
     };
   }, [drawFrame]);
 

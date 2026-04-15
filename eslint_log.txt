@@ -1,0 +1,9 @@
+
+D:\sequence\portfolio\src\components\LoadingScreen.tsx
+  48:45  error  'total' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\sequence\portfolio\src\components\ScrollyCanvas.tsx
+  151:18  warning  The ref value 'bitmapsRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'bitmapsRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+Γ£û 2 problems (1 error, 1 warning)
+
