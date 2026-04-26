@@ -12,6 +12,7 @@ import Certifications from '@/components/Certifications';
 import Contact from '@/components/Contact';
 import ScrollyCanvas from '@/components/ScrollyCanvas';
 import AmbientFx from '@/components/AmbientFx';
+import Chatbot from '@/components/Chatbot';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +41,7 @@ export default function Home() {
           <Experience />
           <Certifications />
           <Contact />
+          <Chatbot />
         </div>
       </main>
     </>
