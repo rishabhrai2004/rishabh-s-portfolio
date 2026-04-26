@@ -87,11 +87,10 @@ export default function Chatbot() {
     <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[10001]">
       {isOpen && (
         <div className="mb-3 w-[92vw] max-w-[500px] h-[600px] md:h-[700px] rounded-3xl border border-white/8 bg-gradient-to-b from-[#0a0e18] to-[#070a14] backdrop-blur-2xl shadow-[0_25px_100px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col">
-          {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
-              <p className="text-sm font-semibold text-white/90">Rishabh's Assistant</p>
+              <p className="text-sm font-semibold text-white/90">Rishabh&apos;s Assistant</p>
             </div>
             <button
               onClick={() => setIsOpen(false)}
@@ -102,21 +101,23 @@ export default function Chatbot() {
             </button>
           </div>
 
-          {/* Messages or Welcome Screen */}
           <div ref={listRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-4 min-h-0">
             {isEmpty ? (
-              // Welcome Screen (Gemini-style)
               <div className="flex flex-col items-center justify-center h-full pb-8">
                 <div className="mb-6">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center shadow-lg">
                     <Sparkles size={28} className="text-black" />
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-white/95 mb-2 text-center">Hi, I'm Rishabh's AI</h2>
+
+                <h2 className="text-2xl font-bold text-white/95 mb-2 text-center">
+                  Hi, I&apos;m Rishabh&apos;s AI
+                </h2>
+
                 <p className="text-white/50 text-sm text-center mb-8 max-w-xs">
                   Ask me about his projects, skills, experience, or how to get in touch
                 </p>
-                
+
                 <div className="grid grid-cols-2 gap-3 w-full">
                   {quickPrompts.map((prompt) => (
                     <button
@@ -124,13 +125,14 @@ export default function Chatbot() {
                       onClick={() => sendMessage(prompt)}
                       className="p-3 rounded-xl text-left text-xs text-white/70 bg-gradient-to-br from-white/8 to-white/3 border border-white/10 hover:border-accent/40 hover:text-accent hover:bg-white/12 transition-all group"
                     >
-                      <div className="font-medium group-hover:translate-x-0.5 transition-transform">{prompt}</div>
+                      <div className="font-medium group-hover:translate-x-0.5 transition-transform">
+                        {prompt}
+                      </div>
                     </button>
                   ))}
                 </div>
               </div>
             ) : (
-              // Messages
               <>
                 {messages.map((m) => (
                   <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -150,9 +152,18 @@ export default function Chatbot() {
                   <div className="flex justify-start">
                     <div className="bg-white/8 text-white/75 border border-white/10 rounded-2xl rounded-bl-none px-4 py-2.5 text-sm">
                       <div className="flex gap-1.5 items-center">
-                        <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-                        <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-                        <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                        <div
+                          className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce"
+                          style={{ animationDelay: '0ms' }}
+                        ></div>
+                        <div
+                          className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce"
+                          style={{ animationDelay: '150ms' }}
+                        ></div>
+                        <div
+                          className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce"
+                          style={{ animationDelay: '300ms' }}
+                        ></div>
                       </div>
                     </div>
                   </div>
@@ -161,7 +172,6 @@ export default function Chatbot() {
             )}
           </div>
 
-          {/* Input Footer */}
           <div className="px-5 py-4 border-t border-white/5 bg-gradient-to-t from-[#070a14] to-transparent shrink-0">
             <form
               onSubmit={(e) => {
