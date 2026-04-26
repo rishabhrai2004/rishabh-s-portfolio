@@ -45,18 +45,25 @@ export default function Chatbot() {
     setInput('');
     setIsTyping(true);
 
-    // Call Gemini API
     fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text }),
     })
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error || 'Chat request failed');
+        }
+        return data;
+      })
       .then((data) => {
         const botMessage: ChatMessage = {
           id: Date.now() + 1,
           role: 'bot',
-          text: data.reply || 'Sorry, I could not process that. Please try again.',
+          text:
+            data.reply ||
+            'I could not use live AI right now, but I can still answer about projects, skills, experience, certifications, and contact details.',
         };
         setMessages((prev) => [...prev, botMessage]);
         setIsTyping(false);
@@ -66,7 +73,7 @@ export default function Chatbot() {
         const errorMessage: ChatMessage = {
           id: Date.now() + 1,
           role: 'bot',
-          text: 'Oops! Something went wrong. Make sure your API key is configured.',
+          text: 'Live AI is temporarily unavailable. Ask me about projects, skills, experience, certifications, or contact and I will still help.',
         };
         setMessages((prev) => [...prev, errorMessage]);
         setIsTyping(false);
