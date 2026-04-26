@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
 const links = [
@@ -13,6 +13,12 @@ const links = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 24,
+    mass: 0.2,
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +32,15 @@ export default function Navbar() {
 
   return (
     <>
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-px origin-left z-[60]"
+        style={{
+          scaleX,
+          background: 'linear-gradient(90deg, rgba(198,255,0,0.15) 0%, var(--accent) 48%, rgba(198,255,0,0.2) 100%)',
+          boxShadow: '0 0 18px var(--accent-muted)',
+        }}
+      />
+
       <header 
         className={`fixed top-0 w-full z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           scrolled ? 'py-4 glass bg-black/40' : 'py-8 bg-transparent'

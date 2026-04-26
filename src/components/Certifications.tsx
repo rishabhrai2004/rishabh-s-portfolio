@@ -6,7 +6,7 @@ import { Award } from 'lucide-react';
 const certifications = [
   { id: 1, title: 'CISCO DATA SCIENCE' },
   { id: 2, title: 'GOOGLE GENERATIVE AI' },
-  { id: 3, title: 'DATA ANALYST BOOTCAMP' }
+  { id: 3, title: 'PRODUCT & DATA ANALYTICS' }
 ];
 
 export default function Certifications() {

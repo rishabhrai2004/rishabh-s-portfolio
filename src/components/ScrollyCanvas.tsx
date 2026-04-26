@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 
 const FRAME_COUNT = 120;
-const BATCH_SIZE = 15;
+const BATCH_SIZE = 6;
+const CRITICAL_FRAMES = 24;
 const MAX_DPR = 1.5; // Cap pixel ratio to prevent huge canvas on HiDPI
 
 export default function ScrollyCanvas() {
@@ -102,6 +103,9 @@ export default function ScrollyCanvas() {
   // Load images and convert to ImageBitmap for GPU-accelerated drawing
   useEffect(() => {
     let cancelled = false;
+    const currentBitmaps = bitmapsRef.current;
+
+    const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
     const loadBitmap = async (i: number): Promise<void> => {
       if (bitmapsRef.current[i]) return;
@@ -132,13 +136,41 @@ export default function ScrollyCanvas() {
       setReady(true);
       drawFrame(0);
 
-      // Rest in batches
-      for (let start = 1; start < FRAME_COUNT; start += BATCH_SIZE) {
+      // Load initial frames quickly so early scrolling stays smooth.
+      const criticalEnd = Math.min(CRITICAL_FRAMES, FRAME_COUNT);
+      for (let start = 1; start < criticalEnd; start += BATCH_SIZE) {
         const end = Math.min(start + BATCH_SIZE, FRAME_COUNT);
         const batch = [];
         for (let i = start; i < end; i++) batch.push(loadBitmap(i));
         await Promise.all(batch);
         if (cancelled) return;
+        await sleep(16);
+      }
+
+      // Defer remaining heavy decode/fetch work until browser idle time.
+      const backgroundLoad = async () => {
+        for (let start = criticalEnd; start < FRAME_COUNT; start += BATCH_SIZE) {
+          const end = Math.min(start + BATCH_SIZE, FRAME_COUNT);
+          const batch = [];
+          for (let i = start; i < end; i++) batch.push(loadBitmap(i));
+          await Promise.all(batch);
+          if (cancelled) return;
+          await sleep(50);
+        }
+      };
+
+      const w = window as Window & {
+        requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      };
+
+      if (w.requestIdleCallback) {
+        w.requestIdleCallback(() => {
+          void backgroundLoad();
+        }, { timeout: 1200 });
+      } else {
+        setTimeout(() => {
+          void backgroundLoad();
+        }, 300);
       }
     };
 
@@ -148,7 +180,6 @@ export default function ScrollyCanvas() {
       cancelled = true;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       // Clean up bitmaps
-      const currentBitmaps = bitmapsRef.current;
       currentBitmaps.forEach(b => b?.close());
     };
   }, [drawFrame]);

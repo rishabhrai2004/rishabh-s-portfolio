@@ -1,38 +1,38 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Database, Code2, LineChart, Cloud, Target, BarChart3 } from 'lucide-react';
+import { Database, Code2, LineChart, Target, BarChart3, BriefcaseBusiness } from 'lucide-react';
 
 const categories = [
   {
-    title: 'PRODUCT ANALYTICS',
+    title: 'PRODUCT & STRATEGY',
     icon: <Target className="w-8 h-8 text-accent" />,
-    skills: ['A/B Testing', 'Funnel Analysis', 'KPI Frameworks', 'PRDs & Specs']
+    skills: ['Strategic Research & Analysis', 'Market Intelligence', 'Project Management', 'Stakeholder Communication']
   },
   {
-    title: 'DATA & PROGRAMMING',
+    title: 'FOUNDERS OFFICE EXECUTION',
+    icon: <BriefcaseBusiness className="w-8 h-8 text-accent" />,
+    skills: ['Executive Reporting', 'Cross-functional Alignment', 'Decision Support', 'Strategic Planning']
+  },
+  {
+    title: 'DATA ANALYSIS & MODELING',
     icon: <Code2 className="w-8 h-8 text-accent" />,
-    skills: ['Python', 'SQL', 'Pandas', 'NumPy']
+    skills: ['Data Analysis & Modeling', 'Python (Pandas)', 'SQL', 'Microsoft Excel']
   },
   {
-    title: 'VISUALIZATION',
+    title: 'DASHBOARDS & VISUAL STORYTELLING',
     icon: <LineChart className="w-8 h-8 text-accent" />,
-    skills: ['Power BI', 'Mixpanel', 'Amplitude', 'Dashboard Design']
+    skills: ['Power BI', 'Dashboard Development', 'Presentation Design', 'Business Narratives']
   },
   {
     title: 'METRICS & REPORTING',
     icon: <BarChart3 className="w-8 h-8 text-accent" />,
-    skills: ['Cohort Analysis', 'Retention Metrics', 'Growth Modeling', 'Executive Reporting']
+    skills: ['KPI Design', 'Operating Metrics', 'Performance Reviews', 'Executive Reporting']
   },
   {
-    title: 'CLOUD & INFRA',
-    icon: <Cloud className="w-8 h-8 text-accent" />,
-    skills: ['AWS S3', 'Snowflake', 'Azure SQL']
-  },
-  {
-    title: 'STRATEGY & TOOLS',
+    title: 'CORE TOOLKIT',
     icon: <Database className="w-8 h-8 text-accent" />,
-    skills: ['Jira', 'Notion', 'Figma', 'Competitive Analysis']
+    skills: ['Microsoft Excel', 'Python (Pandas)', 'SQL', 'Power BI']
   }
 ];
 
@@ -46,6 +46,10 @@ export default function Skills() {
           <span className="text-accent tracking-[0.2em] text-xs md:text-sm font-bold uppercase">02 // Core Competencies</span>
           <div className="h-px bg-white/10 flex-1 ml-8" />
         </div>
+
+        <p className="max-w-3xl text-white/60 text-sm md:text-base leading-relaxed mb-12 md:mb-16">
+          Skill stack tailored for Product, Strategy, and Founder&apos;s Office roles: from strategic market analysis and executive communication to hands-on data modeling and dashboard-led decision systems.
+        </p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {categories.map((cat, idx) => (

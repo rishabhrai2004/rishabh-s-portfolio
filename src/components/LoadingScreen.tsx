@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const NAME_TOP = 'RISHABH';
 const NAME_BOTTOM = 'RAI';
-const LOADING_DURATION = 7000; // 7 seconds
+const LOADING_DURATION = 3500; // 3.5 seconds
 
 export default function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<'assembling' | 'holding' | 'exiting'>('assembling');

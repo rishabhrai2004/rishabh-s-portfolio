@@ -11,6 +11,7 @@ import Experience from '@/components/Experience';
 import Certifications from '@/components/Certifications';
 import Contact from '@/components/Contact';
 import ScrollyCanvas from '@/components/ScrollyCanvas';
+import AmbientFx from '@/components/AmbientFx';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +21,7 @@ export default function Home() {
       <LoadingScreen onComplete={() => setIsLoading(false)} />
       
       <main
-        className="min-h-screen bg-background w-full overflow-x-hidden selection:bg-accent selection:text-black"
+        className="relative min-h-screen bg-background w-full overflow-x-hidden selection:bg-accent selection:text-black"
         style={{
           opacity: isLoading ? 0 : 1,
           transition: 'opacity 0.8s ease-in-out',
@@ -28,6 +29,7 @@ export default function Home() {
         }}
       >
         {!isLoading && <ScrollyCanvas />}
+        {!isLoading && <AmbientFx />}
         
         <div className="relative z-10">
           <Navbar />

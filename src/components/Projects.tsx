@@ -38,6 +38,14 @@ const aiProjects = [
     tools: ['LLMs', 'Market Analysis', 'PMF Framework', 'Data Pipelines'],
     link: 'https://notion-insight-ai.lovable.app/',
     type: 'External'
+  },
+  {
+    id: 5,
+    title: 'Craft Tea - Premium D2C Commerce',
+    description: 'Built a premium tea brand system around ritual, storytelling, and trust, leading end-to-end positioning, pricing architecture, product experience, and conversion strategy. Designed a conversion-led commerce journey with a INR 299-INR 4,999 pricing funnel, using pricing psychology and trust-first UX to shape perceived value before purchase.',
+    tools: ['Brand Positioning', 'Pricing Strategy', 'Conversion UX', 'D2C Commerce'],
+    link: 'https://www.crafttea.page/',
+    type: 'External'
   }
 ];
 
