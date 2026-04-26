@@ -3,11 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 const NVIDIA_API_URL = process.env.NVIDIA_API_URL || 'https://integrate.api.nvidia.com/v1/chat/completions';
 const DEFAULT_MODELS = 'NVIDIABuild-Autogen-82,meta/llama-3.1-70b-instruct,mistralai/mixtral-8x7b-instruct-v0.1';
 
-type ChatHistoryMessage = {
-  role: 'user' | 'assistant';
-  content: string;
-};
-
 function getCandidateModels() {
   const configuredModels = (process.env.NVIDIA_MODELS || '')
     .split(',')
@@ -65,10 +60,6 @@ function hasAny(text: string, words: string[]) {
 function localFallbackReply(input: string) {
   const text = input.toLowerCase();
 
-  if (hasAny(text, ['where', 'location', 'based'])) {
-    return 'I do not have real-time location tracking for Rishabh. The best way to reach him is LinkedIn: https://www.linkedin.com/in/rishabh-rai-961937280/';
-  }
-
   if (hasAny(text, ['project', 'portfolio', 'work'])) {
     return 'Top projects include Retail Product Analytics (Azure SQL + Power BI), Agri-Yield Prediction Hub (Snowflake + AWS S3), CareerOS AI Product Intelligence, AI Startup Idea Validator, and Craft Tea D2C Commerce. Ask for any one project and I can summarize problem, approach, and outcomes.';
   }
@@ -92,7 +83,7 @@ function localFallbackReply(input: string) {
   return 'I can help with projects, skills, experience, certifications, and contact details. Try asking: Top projects summary, tech stack, or how to contact.';
 }
 
-async function requestNvidiaChat(apiKey: string, userMessage: string, history: ChatHistoryMessage[]) {
+async function requestNvidiaChat(apiKey: string, userMessage: string) {
   const models = getCandidateModels();
   let lastError = 'Unknown provider error';
 
@@ -111,7 +102,6 @@ async function requestNvidiaChat(apiKey: string, userMessage: string, history: C
           max_tokens: 700,
           messages: [
             { role: 'system', content: systemPrompt },
-            ...history,
             { role: 'user', content: userMessage },
           ],
         }),
@@ -142,7 +132,7 @@ async function requestNvidiaChat(apiKey: string, userMessage: string, history: C
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, history } = body;
+    const { message } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -150,20 +140,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const safeHistory: ChatHistoryMessage[] = Array.isArray(history)
-      ? history
-          .filter(
-            (item: unknown): item is ChatHistoryMessage =>
-              typeof item === 'object' &&
-              item !== null &&
-              ('role' in item) &&
-              ('content' in item) &&
-              ((item as { role: string }).role === 'user' || (item as { role: string }).role === 'assistant') &&
-              typeof (item as { content: unknown }).content === 'string'
-          )
-          .slice(-8)
-      : [];
 
     const apiKey = process.env.NVIDIA_API_KEY || process.env.GOOGLE_GENERATIVE_AI_KEY;
 
@@ -174,7 +150,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const providerResult = await requestNvidiaChat(apiKey, message, safeHistory);
+    const providerResult = await requestNvidiaChat(apiKey, message);
 
     if (!providerResult.reply) {
       console.error('NVIDIA provider failed. Falling back locally:', providerResult.error);
