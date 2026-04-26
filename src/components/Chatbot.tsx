@@ -11,134 +11,12 @@ type ChatMessage = {
   text: string;
 };
 
-type BotResolution = {
-  reply: string;
-};
-
 const quickPrompts = [
-  'Top projects summary',
-  'What tools are used?',
-  'Show experience highlights',
-  'How to contact?',
+  'Tell me about your projects',
+  'What tech stack do you use?',
+  'Show your experience',
+  'How do I contact you?',
 ];
-
-const projectFacts = [
-  {
-    title: 'Retail Product Analytics',
-    summary: 'Built an end-to-end retail analytics framework using Azure SQL and Power BI to track pricing strategy impact, margin trends, and product KPIs.',
-    tools: ['Azure SQL', 'Power BI', 'DAX', 'Product KPIs'],
-  },
-  {
-    title: 'Agri-Yield Prediction Hub',
-    summary: 'Created an analytics pipeline using Snowflake and AWS S3 for geospatial productivity metrics and yield forecasting for product decisions.',
-    tools: ['AWS S3', 'Snowflake', 'SQL', 'Predictive Analytics'],
-  },
-  {
-    title: 'CareerOS - AI Product Intelligence',
-    summary: 'Designed a product-led career platform using LLM APIs to forecast market demand, identify skill gaps, and generate growth pathways.',
-    tools: ['LLM APIs', 'Product Strategy', 'User Metrics', 'Full Stack'],
-  },
-  {
-    title: 'AI Startup Idea Validator',
-    summary: 'Built a product validation engine for market sizing, competitor benchmarking, and PMF analysis to support founder go/no-go decisions.',
-    tools: ['LLMs', 'Market Analysis', 'PMF Framework', 'Data Pipelines'],
-  },
-  {
-    title: 'Craft Tea - Premium D2C Commerce',
-    summary: 'Led brand positioning, pricing architecture, and conversion UX with an INR 299-INR 4,999 pricing funnel and trust-first commerce journey.',
-    tools: ['Brand Positioning', 'Pricing Strategy', 'Conversion UX', 'D2C Commerce'],
-  },
-];
-
-const experienceFacts = [
-  'Indian Oil Corporation: Product & Data Analytics Intern focused on refinery bottlenecks, SQL/Python analysis, and Power BI KPI dashboards.',
-  'MKTEA: HR Analytics Intern working on 20,000+ employee data to identify recruitment and retention patterns.',
-  'KIIT Entrepreneurship Cell: Director - Growth & Analytics, scaled participation by 35% using data-driven campaigns and A/B-tested outreach.',
-  'KIIT International Model United Nations: Deputy Director for large-scale operations and cross-functional process metrics.',
-];
-
-const certificationFacts = [
-  'Cisco Data Science',
-  'Google Generative AI',
-  'Product & Data Analytics',
-];
-
-const skillFacts = [
-  'Product and strategy: strategic research, market intelligence, project management, stakeholder communication.',
-  'Founder office execution: executive reporting, cross-functional alignment, decision support, strategic planning.',
-  'Data analysis: Python (Pandas), SQL, Excel, data modeling.',
-  'Dashboards and storytelling: Power BI, dashboard development, presentation design, business narratives.',
-  'Metrics and reporting: KPI design, operating metrics, performance reviews, executive reporting.',
-];
-
-function hasAny(text: string, words: string[]) {
-  return words.some((word) => text.includes(word));
-}
-
-function getBotReply(input: string): BotResolution {
-  const text = input.toLowerCase();
-
-  if (hasAny(text, ['project', 'work', 'portfolio', 'case study'])) {
-    const shortlist = projectFacts
-      .slice(0, 3)
-      .map((p, idx) => `${idx + 1}. ${p.title}: ${p.summary}`)
-      .join(' ');
-
-    return {
-      reply: `Top project highlights: ${shortlist} If you want, ask for "all projects" and I will list every one.`,
-    };
-  }
-
-  if (hasAny(text, ['all projects', 'every project', 'full project list'])) {
-    const allProjects = projectFacts
-      .map((p, idx) => `${idx + 1}. ${p.title}`)
-      .join(' | ');
-    return {
-      reply: `Full project list: ${allProjects}. Ask any title and I will break it down by problem, approach, and outcome.`,
-    };
-  }
-
-  if (hasAny(text, ['tools', 'tech stack', 'stack', 'technology'])) {
-    const toolSet = Array.from(new Set(projectFacts.flatMap((p) => p.tools))).join(', ');
-    return {
-      reply: `Main tools used across projects: ${toolSet}. Core analysis stack is SQL + Python + Power BI.`,
-    };
-  }
-
-  if (hasAny(text, ['skill', 'competency', 'strength'])) {
-    return {
-      reply: `Core competencies: ${skillFacts.join(' ')}`,
-    };
-  }
-
-  if (hasAny(text, ['experience', 'background', 'internship', 'role'])) {
-    return {
-      reply: `Experience highlights: ${experienceFacts.join(' ')}`,
-    };
-  }
-
-  if (hasAny(text, ['cert', 'certificate'])) {
-    return {
-      reply: `Certifications: ${certificationFacts.join(', ')}.`,
-    };
-  }
-
-  if (hasAny(text, ['contact', 'email', 'hire', 'reach', 'linkedin', 'github'])) {
-    return {
-      reply: 'Best contact path is LinkedIn from the Contact section. GitHub is also available there for project proof. If you want, I can draft a concise outreach message.',
-    };
-  }
-
-  if (hasAny(text, ['about', 'who are you', 'profile'])) {
-    return {
-      reply: 'Rishabh Rai works at the intersection of product strategy and data analytics, turning ambiguous product questions into measurable experiments, KPIs, dashboards, and roadmap-ready insights.',
-    };
-  }
-
-  return {
-    reply: 'Ask me something specific, for example: "Top projects summary", "What tools are used?", "Show experience highlights", or "How to contact?"',
-  };
-}
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -167,16 +45,32 @@ export default function Chatbot() {
     setInput('');
     setIsTyping(true);
 
-    const resolution = getBotReply(text);
-    window.setTimeout(() => {
-      const botMessage: ChatMessage = {
-        id: Date.now() + 1,
-        role: 'bot',
-        text: resolution.reply,
-      };
-      setMessages((prev) => [...prev, botMessage]);
-      setIsTyping(false);
-    }, 420);
+    // Call Gemini API
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const botMessage: ChatMessage = {
+          id: Date.now() + 1,
+          role: 'bot',
+          text: data.reply || 'Sorry, I could not process that. Please try again.',
+        };
+        setMessages((prev) => [...prev, botMessage]);
+        setIsTyping(false);
+      })
+      .catch((error) => {
+        console.error('Chat error:', error);
+        const errorMessage: ChatMessage = {
+          id: Date.now() + 1,
+          role: 'bot',
+          text: 'Oops! Something went wrong. Make sure your API key is configured.',
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+        setIsTyping(false);
+      });
   };
 
   const unreadCount = useMemo(() => (isOpen ? 0 : 1), [isOpen]);
