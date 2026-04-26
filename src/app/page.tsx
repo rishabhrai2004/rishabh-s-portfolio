@@ -20,6 +20,7 @@ export default function Home() {
   return (
     <>
       <LoadingScreen onComplete={() => setIsLoading(false)} />
+      <Chatbot />
       
       <main
         className="relative min-h-screen bg-background w-full overflow-x-hidden selection:bg-accent selection:text-black"
@@ -41,7 +42,6 @@ export default function Home() {
           <Experience />
           <Certifications />
           <Contact />
-          <Chatbot />
         </div>
       </main>
     </>

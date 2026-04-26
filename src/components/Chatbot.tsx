@@ -13,63 +13,130 @@ type ChatMessage = {
 
 type BotResolution = {
   reply: string;
-  targetSection?: 'projects' | 'skills' | 'contact' | 'certifications' | 'experience' | 'about';
 };
 
 const quickPrompts = [
-  'Show recent projects',
-  'What skills do you have?',
-  'How can I contact you?',
-  'Do you have certifications?',
+  'Top projects summary',
+  'What tools are used?',
+  'Show experience highlights',
+  'How to contact?',
 ];
+
+const projectFacts = [
+  {
+    title: 'Retail Product Analytics',
+    summary: 'Built an end-to-end retail analytics framework using Azure SQL and Power BI to track pricing strategy impact, margin trends, and product KPIs.',
+    tools: ['Azure SQL', 'Power BI', 'DAX', 'Product KPIs'],
+  },
+  {
+    title: 'Agri-Yield Prediction Hub',
+    summary: 'Created an analytics pipeline using Snowflake and AWS S3 for geospatial productivity metrics and yield forecasting for product decisions.',
+    tools: ['AWS S3', 'Snowflake', 'SQL', 'Predictive Analytics'],
+  },
+  {
+    title: 'CareerOS - AI Product Intelligence',
+    summary: 'Designed a product-led career platform using LLM APIs to forecast market demand, identify skill gaps, and generate growth pathways.',
+    tools: ['LLM APIs', 'Product Strategy', 'User Metrics', 'Full Stack'],
+  },
+  {
+    title: 'AI Startup Idea Validator',
+    summary: 'Built a product validation engine for market sizing, competitor benchmarking, and PMF analysis to support founder go/no-go decisions.',
+    tools: ['LLMs', 'Market Analysis', 'PMF Framework', 'Data Pipelines'],
+  },
+  {
+    title: 'Craft Tea - Premium D2C Commerce',
+    summary: 'Led brand positioning, pricing architecture, and conversion UX with an INR 299-INR 4,999 pricing funnel and trust-first commerce journey.',
+    tools: ['Brand Positioning', 'Pricing Strategy', 'Conversion UX', 'D2C Commerce'],
+  },
+];
+
+const experienceFacts = [
+  'Indian Oil Corporation: Product & Data Analytics Intern focused on refinery bottlenecks, SQL/Python analysis, and Power BI KPI dashboards.',
+  'MKTEA: HR Analytics Intern working on 20,000+ employee data to identify recruitment and retention patterns.',
+  'KIIT Entrepreneurship Cell: Director - Growth & Analytics, scaled participation by 35% using data-driven campaigns and A/B-tested outreach.',
+  'KIIT International Model United Nations: Deputy Director for large-scale operations and cross-functional process metrics.',
+];
+
+const certificationFacts = [
+  'Cisco Data Science',
+  'Google Generative AI',
+  'Product & Data Analytics',
+];
+
+const skillFacts = [
+  'Product and strategy: strategic research, market intelligence, project management, stakeholder communication.',
+  'Founder office execution: executive reporting, cross-functional alignment, decision support, strategic planning.',
+  'Data analysis: Python (Pandas), SQL, Excel, data modeling.',
+  'Dashboards and storytelling: Power BI, dashboard development, presentation design, business narratives.',
+  'Metrics and reporting: KPI design, operating metrics, performance reviews, executive reporting.',
+];
+
+function hasAny(text: string, words: string[]) {
+  return words.some((word) => text.includes(word));
+}
 
 function getBotReply(input: string): BotResolution {
   const text = input.toLowerCase();
 
-  if (text.includes('project') || text.includes('work') || text.includes('portfolio')) {
+  if (hasAny(text, ['project', 'work', 'portfolio', 'case study'])) {
+    const shortlist = projectFacts
+      .slice(0, 3)
+      .map((p, idx) => `${idx + 1}. ${p.title}: ${p.summary}`)
+      .join(' ');
+
     return {
-      reply: 'Opening Projects for you. You can explore featured work across product strategy, analytics, dashboarding, and experimentation.',
-      targetSection: 'projects',
+      reply: `Top project highlights: ${shortlist} If you want, ask for "all projects" and I will list every one.`,
     };
   }
 
-  if (text.includes('skill') || text.includes('stack') || text.includes('tool')) {
+  if (hasAny(text, ['all projects', 'every project', 'full project list'])) {
+    const allProjects = projectFacts
+      .map((p, idx) => `${idx + 1}. ${p.title}`)
+      .join(' | ');
     return {
-      reply: 'Opening Skills. Core strengths include product thinking, SQL, Python, analytics, experimentation, and decision-focused dashboards.',
-      targetSection: 'skills',
+      reply: `Full project list: ${allProjects}. Ask any title and I will break it down by problem, approach, and outcome.`,
     };
   }
 
-  if (text.includes('contact') || text.includes('email') || text.includes('hire') || text.includes('reach')) {
+  if (hasAny(text, ['tools', 'tech stack', 'stack', 'technology'])) {
+    const toolSet = Array.from(new Set(projectFacts.flatMap((p) => p.tools))).join(', ');
     return {
-      reply: 'Taking you to Contact. If you want, I can also suggest a short outreach message format.',
-      targetSection: 'contact',
+      reply: `Main tools used across projects: ${toolSet}. Core analysis stack is SQL + Python + Power BI.`,
     };
   }
 
-  if (text.includes('cert') || text.includes('certificate')) {
+  if (hasAny(text, ['skill', 'competency', 'strength'])) {
     return {
-      reply: 'Opening Certifications so you can review credentials and details quickly.',
-      targetSection: 'certifications',
+      reply: `Core competencies: ${skillFacts.join(' ')}`,
     };
   }
 
-  if (text.includes('experience') || text.includes('background')) {
+  if (hasAny(text, ['experience', 'background', 'internship', 'role'])) {
     return {
-      reply: 'Opening Experience. You will see roles, outcomes, and impact across product and data work.',
-      targetSection: 'experience',
+      reply: `Experience highlights: ${experienceFacts.join(' ')}`,
     };
   }
 
-  if (text.includes('about') || text.includes('who are you')) {
+  if (hasAny(text, ['cert', 'certificate'])) {
     return {
-      reply: 'Opening About for a quick overview of profile and working style.',
-      targetSection: 'about',
+      reply: `Certifications: ${certificationFacts.join(', ')}.`,
+    };
+  }
+
+  if (hasAny(text, ['contact', 'email', 'hire', 'reach', 'linkedin', 'github'])) {
+    return {
+      reply: 'Best contact path is LinkedIn from the Contact section. GitHub is also available there for project proof. If you want, I can draft a concise outreach message.',
+    };
+  }
+
+  if (hasAny(text, ['about', 'who are you', 'profile'])) {
+    return {
+      reply: 'Rishabh Rai works at the intersection of product strategy and data analytics, turning ambiguous product questions into measurable experiments, KPIs, dashboards, and roadmap-ready insights.',
     };
   }
 
   return {
-    reply: 'I can take you straight to Projects, Skills, Experience, Certifications, About, or Contact. Try asking: "Show projects".',
+    reply: 'Ask me something specific, for example: "Top projects summary", "What tools are used?", "Show experience highlights", or "How to contact?"',
   };
 }
 
@@ -108,11 +175,6 @@ export default function Chatbot() {
 
     const resolution = getBotReply(text);
     window.setTimeout(() => {
-      if (resolution.targetSection) {
-        const section = document.getElementById(resolution.targetSection);
-        section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-
       const botMessage: ChatMessage = {
         id: Date.now() + 1,
         role: 'bot',
@@ -126,10 +188,10 @@ export default function Chatbot() {
   const unreadCount = useMemo(() => (isOpen ? 0 : 1), [isOpen]);
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[120]">
+    <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[10001]">
       {isOpen && (
-        <div className="mb-3 w-[92vw] max-w-[380px] h-[70vh] max-h-[560px] rounded-2xl border border-white/10 bg-[#07101a]/95 backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.5)] overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[linear-gradient(90deg,rgba(198,255,0,0.15),rgba(198,255,0,0.03))]">
+        <div className="mb-3 w-[92vw] max-w-[420px] h-[520px] md:h-[620px] rounded-2xl border border-white/10 bg-[#07101a]/95 backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[linear-gradient(90deg,rgba(198,255,0,0.15),rgba(198,255,0,0.03)] shrink-0">
             <div className="flex items-center gap-2">
               <Sparkles size={15} className="text-accent" />
               <p className="text-sm font-semibold tracking-[0.08em] text-white/95 uppercase">Portfolio Assistant</p>
@@ -143,7 +205,7 @@ export default function Chatbot() {
             </button>
           </div>
 
-          <div ref={listRef} className="h-[calc(100%-126px)] overflow-y-auto px-3 py-3 space-y-2.5">
+          <div ref={listRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-2.5 min-h-0">
             {messages.map((m) => (
               <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
@@ -167,13 +229,13 @@ export default function Chatbot() {
             )}
           </div>
 
-          <div className="px-3 pt-2 pb-3 border-t border-white/10 bg-[#060d16]">
-            <div className="mb-2 flex flex-wrap gap-1.5">
+          <div className="px-3 pt-2 pb-3 border-t border-white/10 bg-[#060d16] shrink-0 space-y-2.5">
+            <div className="flex flex-wrap gap-1.5">
               {quickPrompts.map((prompt) => (
                 <button
                   key={prompt}
                   onClick={() => sendMessage(prompt)}
-                  className="rounded-full border border-white/12 bg-white/5 px-2.5 py-1 text-[11px] text-white/75 hover:text-accent hover:border-accent/45 transition-colors"
+                  className="rounded-full border border-white/12 bg-white/5 px-2 py-0.5 text-[10px] text-white/75 hover:text-accent hover:border-accent/45 transition-colors"
                 >
                   {prompt}
                 </button>
@@ -190,15 +252,15 @@ export default function Chatbot() {
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about work, skills, contact..."
-                className="w-full rounded-xl border border-white/12 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-accent/50"
+                placeholder="Ask..."
+                className="w-full rounded-lg border border-white/12 bg-white/5 px-2.5 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-accent/50"
               />
               <button
                 type="submit"
-                className="shrink-0 rounded-xl bg-accent p-2.5 text-black hover:brightness-105 transition"
+                className="shrink-0 rounded-lg bg-accent p-2 text-black hover:brightness-105 transition"
                 aria-label="Send message"
               >
-                <Send size={15} />
+                <Send size={16} />
               </button>
             </form>
           </div>
