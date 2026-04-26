@@ -11,6 +11,11 @@ type ChatMessage = {
   text: string;
 };
 
+type ApiHistoryMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
 const quickPrompts = [
   'Tell me about your projects',
   'What tech stack do you use?',
@@ -35,6 +40,13 @@ export default function Chatbot() {
     const text = rawText.trim();
     if (!text || isTyping) return;
 
+    const history: ApiHistoryMessage[] = messages
+      .slice(-8)
+      .map((msg) => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.text,
+      }));
+
     const userMessage: ChatMessage = {
       id: Date.now(),
       role: 'user',
@@ -48,7 +60,7 @@ export default function Chatbot() {
     fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({ message: text, history }),
     })
       .then(async (res) => {
         const data = await res.json();
