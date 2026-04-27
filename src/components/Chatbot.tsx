@@ -103,7 +103,7 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
     <AnimatePresence>
       {showLauncher && (
         <motion.div
-          className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[10001]"
+          className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[120]"
           initial={{ opacity: 0, scale: 0.2, y: 120, rotate: -18, filter: 'blur(10px)' }}
           animate={{
             opacity: 1,

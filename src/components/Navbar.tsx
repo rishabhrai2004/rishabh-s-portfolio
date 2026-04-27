@@ -28,12 +28,28 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+      return;
+    }
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isOpen]);
+
   const closeMenu = () => setIsOpen(false);
 
   return (
     <>
       <motion.div
-        className="fixed top-0 left-0 right-0 h-px origin-left z-[60]"
+        className="fixed top-0 left-0 right-0 h-px origin-left z-[140]"
         style={{
           scaleX,
           background: 'linear-gradient(90deg, rgba(198,255,0,0.15) 0%, var(--accent) 48%, rgba(198,255,0,0.2) 100%)',
@@ -42,7 +58,7 @@ export default function Navbar() {
       />
 
       <header 
-        className={`fixed top-0 w-full z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`fixed top-0 w-full z-[150] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           scrolled ? 'py-4 glass bg-black/40' : 'py-8 bg-transparent'
         }`}
       >
@@ -80,7 +96,7 @@ export default function Navbar() {
 
           {/* Mobile Toggle */}
           <button 
-            className="md:hidden text-white z-50 p-2 hover:text-accent transition-colors"
+            className="md:hidden text-white z-[160] p-2 hover:text-accent transition-colors"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -96,7 +112,7 @@ export default function Navbar() {
             animate={{ opacity: 1, clipPath: 'circle(150% at 100% 0)' }}
             exit={{ opacity: 0, clipPath: 'circle(0% at 100% 0)' }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-40 bg-[#030712] flex flex-col justify-center items-center p-6"
+            className="fixed inset-0 z-[145] bg-[#030712] flex flex-col justify-center items-center p-6"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
             
