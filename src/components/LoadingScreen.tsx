@@ -10,6 +10,63 @@ const HOLD_START = 4600;
 const EXIT_START = 9700;
 const HOLD_DURATION = (EXIT_START - HOLD_START) / 1000;
 
+// Generate cinematic startup sound using Web Audio API
+function playCinematicStartup() {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Create oscillators for a sci-fi startup sound
+    const now = audioContext.currentTime;
+    
+    // Main sweep - rising frequency
+    const osc1 = audioContext.createOscillator();
+    const gain1 = audioContext.createGain();
+    osc1.connect(gain1);
+    gain1.connect(audioContext.destination);
+    
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(200, now);
+    osc1.frequency.exponentialRampToValueAtTime(1200, now + 1.5);
+    gain1.gain.setValueAtTime(0.3, now);
+    gain1.gain.exponentialRampToValueAtTime(0.1, now + 1.5);
+    
+    osc1.start(now);
+    osc1.stop(now + 1.5);
+    
+    // Secondary harmonic sweep
+    const osc2 = audioContext.createOscillator();
+    const gain2 = audioContext.createGain();
+    osc2.connect(gain2);
+    gain2.connect(audioContext.destination);
+    
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(100, now);
+    osc2.frequency.exponentialRampToValueAtTime(600, now + 1.5);
+    gain2.gain.setValueAtTime(0.2, now);
+    gain2.gain.exponentialRampToValueAtTime(0.05, now + 1.5);
+    
+    osc2.start(now);
+    osc2.stop(now + 1.5);
+    
+    // Add second phase - stabilization tone at 2.5s
+    const osc3 = audioContext.createOscillator();
+    const gain3 = audioContext.createGain();
+    osc3.connect(gain3);
+    gain3.connect(audioContext.destination);
+    
+    osc3.type = 'sine';
+    osc3.frequency.setValueAtTime(800, now + 2.5);
+    gain3.gain.setValueAtTime(0, now + 2.5);
+    gain3.gain.linearRampToValueAtTime(0.15, now + 2.7);
+    gain3.gain.linearRampToValueAtTime(0, now + 3.2);
+    
+    osc3.start(now + 2.5);
+    osc3.stop(now + 3.2);
+  } catch (error) {
+    console.log('Audio playback not available');
+  }
+}
+
 function mapTimelineProgress(elapsed: number) {
   if (elapsed <= HOLD_START) {
     const t = elapsed / HOLD_START;
@@ -40,6 +97,9 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   }, [onComplete]);
 
   useEffect(() => {
+    // Play cinematic startup audio
+    playCinematicStartup();
+    
     const startTime = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
