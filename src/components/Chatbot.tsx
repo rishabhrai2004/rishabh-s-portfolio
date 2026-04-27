@@ -92,8 +92,8 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
       className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[10001]"
       style={{
         opacity: isLoading ? 0 : 1,
-        transform: isLoading ? 'scale(0.95)' : 'scale(1)',
-        transition: 'opacity 0.6s ease-out 3s, transform 0.6s ease-out 3s',
+        transform: isLoading ? 'scale(0.8) translateY(30px)' : 'scale(1) translateY(0)',
+        transition: 'opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
         pointerEvents: isLoading ? 'none' : 'auto',
       }}
     >
