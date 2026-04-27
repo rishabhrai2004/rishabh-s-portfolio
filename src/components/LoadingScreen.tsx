@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NAME_TOP = 'RISHABH';
@@ -9,63 +9,7 @@ const LOADING_DURATION = 12000;
 const HOLD_START = 4600;
 const EXIT_START = 9700;
 const HOLD_DURATION = (EXIT_START - HOLD_START) / 1000;
-
-// Generate cinematic startup sound using Web Audio API
-function playCinematicStartup() {
-  try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    
-    // Create oscillators for a sci-fi startup sound
-    const now = audioContext.currentTime;
-    
-    // Main sweep - rising frequency
-    const osc1 = audioContext.createOscillator();
-    const gain1 = audioContext.createGain();
-    osc1.connect(gain1);
-    gain1.connect(audioContext.destination);
-    
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(200, now);
-    osc1.frequency.exponentialRampToValueAtTime(1200, now + 1.5);
-    gain1.gain.setValueAtTime(0.3, now);
-    gain1.gain.exponentialRampToValueAtTime(0.1, now + 1.5);
-    
-    osc1.start(now);
-    osc1.stop(now + 1.5);
-    
-    // Secondary harmonic sweep
-    const osc2 = audioContext.createOscillator();
-    const gain2 = audioContext.createGain();
-    osc2.connect(gain2);
-    gain2.connect(audioContext.destination);
-    
-    osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(100, now);
-    osc2.frequency.exponentialRampToValueAtTime(600, now + 1.5);
-    gain2.gain.setValueAtTime(0.2, now);
-    gain2.gain.exponentialRampToValueAtTime(0.05, now + 1.5);
-    
-    osc2.start(now);
-    osc2.stop(now + 1.5);
-    
-    // Add second phase - stabilization tone at 2.5s
-    const osc3 = audioContext.createOscillator();
-    const gain3 = audioContext.createGain();
-    osc3.connect(gain3);
-    gain3.connect(audioContext.destination);
-    
-    osc3.type = 'sine';
-    osc3.frequency.setValueAtTime(800, now + 2.5);
-    gain3.gain.setValueAtTime(0, now + 2.5);
-    gain3.gain.linearRampToValueAtTime(0.15, now + 2.7);
-    gain3.gain.linearRampToValueAtTime(0, now + 3.2);
-    
-    osc3.start(now + 2.5);
-    osc3.stop(now + 3.2);
-  } catch (error) {
-    console.log('Audio playback not available');
-  }
-}
+const SOUNDTRACK_PATH = '/sequence/loading-cinematic.wav';
 
 function mapTimelineProgress(elapsed: number) {
   if (elapsed <= HOLD_START) {
@@ -91,20 +35,98 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   const [phase, setPhase] = useState<'assembling' | 'holding' | 'exiting'>('assembling');
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [showAudioPrompt, setShowAudioPrompt] = useState(false);
+  const soundtrackRef = useRef<HTMLAudioElement | null>(null);
+  const hasPlayedAudioRef = useRef(false);
+  const loadingStartedAtRef = useRef(0);
+  const lastAudioSyncRef = useRef(0);
 
   const handleComplete = useCallback(() => {
     onComplete();
   }, [onComplete]);
 
+  const getElapsedSeconds = useCallback(() => {
+    if (!loadingStartedAtRef.current) {
+      return 0;
+    }
+
+    const elapsedMs = Date.now() - loadingStartedAtRef.current;
+    const boundedMs = Math.min(Math.max(elapsedMs, 0), LOADING_DURATION);
+    return boundedMs / 1000;
+  }, []);
+
+  const syncSoundtrackToTimeline = useCallback((soundtrack: HTMLAudioElement) => {
+    const elapsedSeconds = getElapsedSeconds();
+
+    // Keep soundtrack exactly aligned to the visual timeline.
+    if (Number.isFinite(soundtrack.duration) && soundtrack.duration > 0) {
+      const targetRate = soundtrack.duration / (LOADING_DURATION / 1000);
+      soundtrack.playbackRate = Math.min(Math.max(targetRate, 0.9), 1.15);
+      soundtrack.currentTime = Math.min(elapsedSeconds, Math.max(soundtrack.duration - 0.08, 0));
+      return;
+    }
+
+    soundtrack.currentTime = elapsedSeconds;
+  }, [getElapsedSeconds]);
+
+  const playCinematicStartup = useCallback(async () => {
+    if (hasPlayedAudioRef.current) {
+      return;
+    }
+
+    try {
+      if (!soundtrackRef.current) {
+        const soundtrack = new Audio(SOUNDTRACK_PATH);
+        soundtrack.preload = 'auto';
+        soundtrack.volume = 0.68;
+        soundtrack.currentTime = 0;
+        soundtrack.addEventListener('loadedmetadata', () => {
+          syncSoundtrackToTimeline(soundtrack);
+        }, { once: true });
+        soundtrackRef.current = soundtrack;
+      }
+
+      const soundtrack = soundtrackRef.current;
+      syncSoundtrackToTimeline(soundtrack);
+      await soundtrack.play();
+      hasPlayedAudioRef.current = true;
+      setShowAudioPrompt(false);
+    } catch {
+      setShowAudioPrompt(true);
+    }
+  }, [syncSoundtrackToTimeline]);
+
   useEffect(() => {
-    // Play cinematic startup audio
-    playCinematicStartup();
+    loadingStartedAtRef.current = Date.now();
+    void playCinematicStartup();
+
+    const unlockAudio = () => {
+      void playCinematicStartup();
+    };
+
+    window.addEventListener('pointerdown', unlockAudio, { once: true });
+    window.addEventListener('keydown', unlockAudio, { once: true });
+    window.addEventListener('touchstart', unlockAudio, { once: true });
     
     const startTime = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const bounded = Math.min(elapsed, LOADING_DURATION);
       setProgress(mapTimelineProgress(bounded));
+
+      if (
+        soundtrackRef.current &&
+        !soundtrackRef.current.paused &&
+        elapsed - lastAudioSyncRef.current >= 500
+      ) {
+        const target = bounded / 1000;
+        const drift = Math.abs(soundtrackRef.current.currentTime - target);
+        if (drift > 0.22) {
+          syncSoundtrackToTimeline(soundtrackRef.current);
+        }
+        lastAudioSyncRef.current = elapsed;
+      }
+
       if (elapsed >= LOADING_DURATION) clearInterval(interval);
     }, 16);
 
@@ -120,8 +142,21 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       clearTimeout(holdTimer);
       clearTimeout(exitTimer);
       clearTimeout(hideTimer);
+
+      window.removeEventListener('pointerdown', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+
+      if (soundtrackRef.current) {
+        soundtrackRef.current.pause();
+        soundtrackRef.current.currentTime = 0;
+        soundtrackRef.current = null;
+      }
+
+      loadingStartedAtRef.current = 0;
+      lastAudioSyncRef.current = 0;
     };
-  }, [handleComplete]);
+  }, [handleComplete, playCinematicStartup, syncSoundtrackToTimeline]);
 
   // Random initial positions for each letter (falling from different spots)
   const getLetterEntrance = (index: number) => {
@@ -276,6 +311,28 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                   : { duration: HOLD_START / 1000, ease: [0.22, 1, 0.36, 1] }
             }
           />
+
+          <AnimatePresence>
+            {showAudioPrompt && phase !== 'exiting' && (
+              <motion.button
+                type="button"
+                onClick={() => void playCinematicStartup()}
+                className="absolute top-[max(0.9rem,env(safe-area-inset-top))] right-[max(0.9rem,env(safe-area-inset-right))] rounded-full border px-4 py-2 text-[11px] tracking-[0.16em] z-30"
+                style={{
+                  borderColor: 'rgba(198,255,0,0.38)',
+                  color: 'rgba(229,255,160,0.9)',
+                  background: 'rgba(5,12,16,0.78)',
+                  boxShadow: '0 0 30px rgba(198,255,0,0.14)',
+                }}
+                initial={{ opacity: 0, y: -12, scale: 0.94 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              >
+                ENABLE CINEMATIC AUDIO
+              </motion.button>
+            )}
+          </AnimatePresence>
 
           <motion.div
             className="absolute left-[-20%] right-[-20%] h-px rotate-[13deg] pointer-events-none"

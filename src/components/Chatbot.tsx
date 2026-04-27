@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { MessageCircle, Send, Sparkles, X } from 'lucide-react';
 
 type Role = 'user' | 'bot';
@@ -28,8 +28,19 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [showLauncher, setShowLauncher] = useState(false);
 
   const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isLoading) {
+      setShowLauncher(false);
+      return;
+    }
+
+    const timer = setTimeout(() => setShowLauncher(true), 260);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   useEffect(() => {
     if (!listRef.current) return;
@@ -88,32 +99,22 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
   const unreadCount = useMemo(() => (isOpen ? 0 : 1), [isOpen]);
   const isEmpty = messages.length === 0;
 
-  const containerVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.7,
-      y: 40,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-      },
-    },
-  };
-
   return (
-    <motion.div 
-      className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[10001]"
-      variants={containerVariants}
-      initial="hidden"
-      animate={isLoading ? 'hidden' : 'visible'}
-      style={{
-        pointerEvents: isLoading ? 'none' : 'auto',
-      }}
-    >
+    <AnimatePresence>
+      {showLauncher && (
+        <motion.div
+          className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[10001]"
+          initial={{ opacity: 0, scale: 0.2, y: 120, rotate: -18, filter: 'blur(10px)' }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            rotate: 0,
+            filter: 'blur(0px)',
+            transition: { type: 'spring', damping: 17, stiffness: 220, mass: 0.8 },
+          }}
+          exit={{ opacity: 0, scale: 0.85, y: 30, transition: { duration: 0.2 } }}
+        >
       {isOpen && (
         <div className="mb-3 w-[92vw] max-w-[500px] h-[600px] md:h-[700px] rounded-3xl border border-white/8 bg-gradient-to-b from-[#0a0e18] to-[#070a14] backdrop-blur-2xl shadow-[0_25px_100px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between px-5 py-4 shrink-0">
@@ -228,18 +229,36 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
         </div>
       )}
 
-      <button
+      <motion.button
         onClick={() => setIsOpen((v) => !v)}
         className="relative h-14 w-14 rounded-full bg-gradient-to-br from-accent to-accent/80 text-black shadow-[0_0_50px_rgba(198,255,0,0.4)] hover:scale-[1.06] hover:shadow-[0_0_60px_rgba(198,255,0,0.5)] transition-all"
         aria-label="Open portfolio chat assistant"
+        animate={{
+          y: [0, -5, 0],
+          boxShadow: [
+            '0 0 34px rgba(198,255,0,0.32)',
+            '0 0 58px rgba(198,255,0,0.52)',
+            '0 0 34px rgba(198,255,0,0.32)',
+          ],
+        }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.94 }}
       >
+        <motion.span
+          className="absolute inset-0 rounded-full border border-accent/55"
+          animate={{ scale: [1, 1.38], opacity: [0.56, 0] }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: 'easeOut' }}
+        />
         <MessageCircle className="mx-auto" size={24} />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-white text-black text-[10px] font-bold grid place-items-center border border-black/30 shadow-lg">
             {unreadCount}
           </span>
         )}
-      </button>
-    </motion.div>
+      </motion.button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
