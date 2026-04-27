@@ -38,6 +38,10 @@
     mix-blend-mode: soft-light;
     animation: grain-shift 10s steps(8) infinite;
   }
+
+  .animate-chat-button {
+    animation: chat-button-enter 0.6s ease-out 3s backwards;
+  }
 }
 
 @keyframes grain-shift {
@@ -55,6 +59,17 @@
   }
   100% {
     transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes chat-button-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

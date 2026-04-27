@@ -20,7 +20,7 @@ export default function Home() {
   return (
     <>
       <LoadingScreen onComplete={() => setIsLoading(false)} />
-      <Chatbot />
+      <Chatbot isLoading={isLoading} />
       
       <main
         className="relative min-h-screen bg-background w-full overflow-x-hidden selection:bg-accent selection:text-black"

@@ -11,6 +11,10 @@ type ChatMessage = {
   text: string;
 };
 
+interface ChatbotProps {
+  isLoading?: boolean;
+}
+
 const quickPrompts = [
   'Tell me about your projects',
   'What tech stack do you use?',
@@ -18,7 +22,7 @@ const quickPrompts = [
   'How do I contact you?',
 ];
 
-export default function Chatbot() {
+export default function Chatbot({ isLoading = false }: ChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -84,7 +88,15 @@ export default function Chatbot() {
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[10001]">
+    <div 
+      className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[10001]"
+      style={{
+        opacity: isLoading ? 0 : 1,
+        transform: isLoading ? 'scale(0.95)' : 'scale(1)',
+        transition: 'opacity 0.6s ease-out 3s, transform 0.6s ease-out 3s',
+        pointerEvents: isLoading ? 'none' : 'auto',
+      }}
+    >
       {isOpen && (
         <div className="mb-3 w-[92vw] max-w-[500px] h-[600px] md:h-[700px] rounded-3xl border border-white/8 bg-gradient-to-b from-[#0a0e18] to-[#070a14] backdrop-blur-2xl shadow-[0_25px_100px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between px-5 py-4 shrink-0">
