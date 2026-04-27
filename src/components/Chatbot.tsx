@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { MessageCircle, Send, Sparkles, X } from 'lucide-react';
 
 type Role = 'user' | 'bot';
@@ -87,13 +88,29 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
   const unreadCount = useMemo(() => (isOpen ? 0 : 1), [isOpen]);
   const isEmpty = messages.length === 0;
 
+  const containerVariants = {
+    hidden: {
+      opacity: 0,
+      scale: 0.7,
+      y: 40,
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+      },
+    },
+  };
+
   return (
-    <div 
+    <motion.div 
       className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] sm:bottom-6 sm:right-6 z-[10001]"
+      variants={containerVariants}
+      initial="hidden"
+      animate={isLoading ? 'hidden' : 'visible'}
       style={{
-        opacity: isLoading ? 0 : 1,
-        transform: isLoading ? 'scale(0.8) translateY(30px)' : 'scale(1) translateY(0)',
-        transition: 'opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
         pointerEvents: isLoading ? 'none' : 'auto',
       }}
     >
@@ -223,6 +240,6 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
           </span>
         )}
       </button>
-    </div>
+    </motion.div>
   );
 }
