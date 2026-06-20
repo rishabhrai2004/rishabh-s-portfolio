@@ -122,34 +122,8 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   }, [syncSoundtrackToTimeline]);
 
   useEffect(() => {
-    // Play the full cinematic on a fresh visit, but don't make returning
-    // (in-session) or reduced-motion visitors sit through it again.
-    let prefersReduced = false;
-    try {
-      prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    } catch {
-      prefersReduced = false;
-    }
-
-    let alreadySeen = false;
-    try {
-      alreadySeen = sessionStorage.getItem('rr-intro-seen') === '1';
-    } catch {
-      alreadySeen = false;
-    }
-
-    if (prefersReduced || alreadySeen) {
-      setIsVisible(false);
-      handleComplete();
-      return;
-    }
-
-    try {
-      sessionStorage.setItem('rr-intro-seen', '1');
-    } catch {
-      /* storage unavailable — still play the intro, just don't persist */
-    }
-
+    // Play the full cinematic intro on every visit. Visitors who want to skip
+    // can use the "Skip Intro" button.
     loadingStartedAtRef.current = Date.now();
     void playCinematicStartup();
 
