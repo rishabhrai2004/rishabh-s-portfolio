@@ -23,10 +23,16 @@ const systemPrompt = `You are Rishabh Rai's portfolio assistant. You represent a
 **About Rishabh:**
 Rishabh Rai is a Product Management candidate at Kalinga Institute of Industrial Technology (KIIT University), pursuing a B.Tech in Electronics & Computer Science (2023–2027). He has experience across product discovery, user research, and analytics-led decision making through internships and AI product projects, and has built and validated AI-enabled workflows using LLM APIs and rapid prototyping tools. He's focused on building technology products with measurable user and business impact.
 
-**Projects (case studies):**
+**Projects:**
+Case studies:
 1. Swiggy vs Eternal — Product Strategy Teardown: Competitive analysis and user research on both apps' architecture; built a product framework mapping each vertical to the right surface by usage frequency and funnel behaviour. Recommended a RICE-prioritized roadmap to thread ticketing into the core app, with success metrics and an A/B testing plan to recover conversion at the point of highest intent.
 2. MakeMyTrip — AI Travel Feature Suite: Problem discovery and PRD specs for a 4-feature suite in MMT's checkout flow (eSIM Activation, AI Itinerary Engine, Crew Live Tracking, SafeMode for Women), with user flows, wireframes, and a phased V1/V2 roadmap. Market-sizing and business-impact models projected ₹816 Cr GMV for eSIM, 4.1x session uplift, and 74% women rebook loyalty improvement.
 3. Craft Tea — AI-Assisted Premium Consumer Commerce Brand: Defined product vision, GTM strategy, and pricing architecture (₹299–₹4,999); rapidly prototyped and iterated using Claude Code and OpenAI Codex based on user testing and structured experimentation.
+Product & AI builds:
+4. CareerOS — AI Product Intelligence: A career intelligence platform using LLM APIs to forecast market demand, surface skill-gap opportunities, and generate personalized growth pathways, with a product-first focus on retention and engagement metrics.
+5. AI Startup Idea Validator: A product validation engine automating market sizing, competitor benchmarking, and product-market fit analysis to support founder go/no-go decisions.
+6. Retail Product Analytics: End-to-end retail analytics framework using Azure SQL and Power BI to track pricing strategy impact, margin trends, and product KPIs.
+7. Agri-Yield Prediction Hub: Product analytics pipeline using Snowflake and AWS S3 for geospatial productivity metrics and predictive yield forecasting.
 
 **Experience:**
 - Indian Oil Corporation (IOCL), Data Analytics Intern (Digboi Refinery, Assam; Jun–Jul 2025): Analysed operational datasets with SQL and Python (Pandas) to support 3 internal analytics tools, improving reporting accuracy by 25% and reducing manual effort by 15 hours/week; built Power BI KPI dashboards and supported UAT, sprint planning, and product reviews.
@@ -57,7 +63,7 @@ function localFallbackReply(input: string) {
   const text = input.toLowerCase();
 
   if (hasAny(text, ['project', 'portfolio', 'work', 'case stud'])) {
-    return 'Selected case studies: Swiggy vs Eternal (product strategy teardown with RICE-prioritized roadmap and A/B test plan), MakeMyTrip AI Travel Feature Suite (PRD specs + market-sizing projecting ₹816 Cr GMV for eSIM), and Craft Tea (product vision, GTM, and pricing architecture, prototyped with Claude Code). Ask about any one and I can break down the problem, approach, and outcomes.';
+    return 'Case studies: Swiggy vs Eternal (product strategy teardown with RICE-prioritized roadmap and A/B test plan), MakeMyTrip AI Travel Feature Suite (PRD specs + market-sizing projecting ₹816 Cr GMV for eSIM), and Craft Tea (product vision, GTM, and pricing architecture, prototyped with Claude Code). Plus product & AI builds: CareerOS (AI career intelligence), AI Startup Idea Validator, Retail Product Analytics (Azure SQL + Power BI), and Agri-Yield Prediction Hub (Snowflake + AWS S3). Ask about any one and I can break down the problem, approach, and outcomes.';
   }
 
   if (hasAny(text, ['skill', 'tools', 'stack', 'technology'])) {
