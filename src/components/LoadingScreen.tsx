@@ -5,35 +5,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const NAME_TOP = 'RISHABH';
 const NAME_BOTTOM = 'RAI';
-const LOADING_DURATION = 12000;
-const HOLD_START = 4600;
-const EXIT_START = 9700;
-const HOLD_DURATION = (EXIT_START - HOLD_START) / 1000;
+
+// Timeline (ms)
+const REVEAL_AT = 6400;       // counter/words hand off to the name reveal
+const EXIT_AT = 9000;         // curtain begins lifting; counter hits 100
+const CURTAIN_MS = 1200;
+const LOADING_DURATION = EXIT_AT + CURTAIN_MS; // loader fully gone
+
 const SOUNDTRACK_PATH = '/sequence/loading-cinematic.wav';
+const WORDS = ['PRODUCT', 'STRATEGY', 'RESEARCH', 'ANALYTICS', 'EXPERIENCE'];
 
-function mapTimelineProgress(elapsed: number) {
-  if (elapsed <= HOLD_START) {
-    const t = elapsed / HOLD_START;
-    const eased = 1 - Math.pow(1 - t, 1.7);
-    return eased * 0.45;
-  }
+type Phase = 'count' | 'reveal' | 'exit';
 
-  if (elapsed <= EXIT_START) {
-    const t = (elapsed - HOLD_START) / (EXIT_START - HOLD_START);
-    const eased = t < 0.5
-      ? 2 * t * t
-      : 1 - Math.pow(-2 * t + 2, 2) / 2;
-    return 0.45 + eased * 0.37;
-  }
-
-  const t = (elapsed - EXIT_START) / (LOADING_DURATION - EXIT_START);
-  const eased = 1 - Math.pow(1 - t, 2.1);
-  return Math.min(0.82 + eased * 0.18, 1);
+// easeInOutCubic — counter climbs with weight, settling into 100 at EXIT_AT.
+function timelineProgress(elapsed: number) {
+  const t = Math.min(elapsed / EXIT_AT, 1);
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+const RISE = [0.16, 1, 0.3, 1] as const;
+const SWAP = [0.76, 0, 0.24, 1] as const;
+
 export default function LoadingScreen({ onComplete }: { onComplete: () => void }) {
-  const [phase, setPhase] = useState<'assembling' | 'holding' | 'exiting'>('assembling');
+  const [phase, setPhase] = useState<Phase>('count');
   const [progress, setProgress] = useState(0);
+  const [wordIndex, setWordIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [showAudioPrompt, setShowAudioPrompt] = useState(false);
   const soundtrackRef = useRef<HTMLAudioElement | null>(null);
@@ -42,7 +38,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   const lastAudioSyncRef = useRef(0);
   const timersRef = useRef<{
     interval?: ReturnType<typeof setInterval>;
-    hold?: ReturnType<typeof setTimeout>;
+    reveal?: ReturnType<typeof setTimeout>;
     exit?: ReturnType<typeof setTimeout>;
     hide?: ReturnType<typeof setTimeout>;
   }>({});
@@ -51,30 +47,8 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     onComplete();
   }, [onComplete]);
 
-  const handleSkip = useCallback(() => {
-    const timers = timersRef.current;
-    if (timers.interval) clearInterval(timers.interval);
-    if (timers.hold) clearTimeout(timers.hold);
-    if (timers.exit) clearTimeout(timers.exit);
-    if (timers.hide) clearTimeout(timers.hide);
-
-    if (soundtrackRef.current) {
-      soundtrackRef.current.pause();
-    }
-
-    setProgress(1);
-    setPhase('exiting');
-    timersRef.current.hide = setTimeout(() => {
-      setIsVisible(false);
-      handleComplete();
-    }, 700);
-  }, [handleComplete]);
-
   const getElapsedSeconds = useCallback(() => {
-    if (!loadingStartedAtRef.current) {
-      return 0;
-    }
-
+    if (!loadingStartedAtRef.current) return 0;
     const elapsedMs = Date.now() - loadingStartedAtRef.current;
     const boundedMs = Math.min(Math.max(elapsedMs, 0), LOADING_DURATION);
     return boundedMs / 1000;
@@ -83,7 +57,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   const syncSoundtrackToTimeline = useCallback((soundtrack: HTMLAudioElement) => {
     const elapsedSeconds = getElapsedSeconds();
 
-    // Keep soundtrack exactly aligned to the visual timeline.
+    // Keep soundtrack aligned to the visual timeline.
     if (Number.isFinite(soundtrack.duration) && soundtrack.duration > 0) {
       const targetRate = soundtrack.duration / (LOADING_DURATION / 1000);
       soundtrack.playbackRate = Math.min(Math.max(targetRate, 0.9), 1.15);
@@ -95,9 +69,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   }, [getElapsedSeconds]);
 
   const playCinematicStartup = useCallback(async () => {
-    if (hasPlayedAudioRef.current) {
-      return;
-    }
+    if (hasPlayedAudioRef.current) return;
 
     try {
       if (!soundtrackRef.current) {
@@ -121,536 +93,243 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     }
   }, [syncSoundtrackToTimeline]);
 
+  // Master timeline
   useEffect(() => {
-    // Play the full cinematic intro on every visit. Visitors who want to skip
-    // can use the "Skip Intro" button.
     loadingStartedAtRef.current = Date.now();
     void playCinematicStartup();
 
-    const unlockAudio = () => {
-      void playCinematicStartup();
-    };
-
+    const unlockAudio = () => { void playCinematicStartup(); };
     window.addEventListener('pointerdown', unlockAudio, { once: true });
     window.addEventListener('keydown', unlockAudio, { once: true });
     window.addEventListener('touchstart', unlockAudio, { once: true });
-    
+
     const startTime = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
-      const bounded = Math.min(elapsed, LOADING_DURATION);
-      setProgress(mapTimelineProgress(bounded));
+      setProgress(timelineProgress(elapsed));
 
       if (
         soundtrackRef.current &&
         !soundtrackRef.current.paused &&
         elapsed - lastAudioSyncRef.current >= 500
       ) {
-        const target = bounded / 1000;
+        const target = Math.min(elapsed, LOADING_DURATION) / 1000;
         const drift = Math.abs(soundtrackRef.current.currentTime - target);
-        if (drift > 0.22) {
-          syncSoundtrackToTimeline(soundtrackRef.current);
-        }
+        if (drift > 0.22) syncSoundtrackToTimeline(soundtrackRef.current);
         lastAudioSyncRef.current = elapsed;
       }
 
       if (elapsed >= LOADING_DURATION) clearInterval(interval);
     }, 16);
 
-    const holdTimer = setTimeout(() => setPhase('holding'), HOLD_START);
-    const exitTimer = setTimeout(() => setPhase('exiting'), EXIT_START);
-    const hideTimer = setTimeout(() => {
-      setIsVisible(false);
-      handleComplete();
-    }, LOADING_DURATION);
+    const revealTimer = setTimeout(() => setPhase('reveal'), REVEAL_AT);
+    const exitTimer = setTimeout(() => {
+      setPhase('exit');
+      handleComplete(); // reveal the site beneath as the curtain lifts
+    }, EXIT_AT);
+    const hideTimer = setTimeout(() => setIsVisible(false), LOADING_DURATION);
 
-    timersRef.current = { interval, hold: holdTimer, exit: exitTimer, hide: hideTimer };
+    timersRef.current = { interval, reveal: revealTimer, exit: exitTimer, hide: hideTimer };
 
     return () => {
       clearInterval(interval);
-      clearTimeout(holdTimer);
+      clearTimeout(revealTimer);
       clearTimeout(exitTimer);
       clearTimeout(hideTimer);
-
       window.removeEventListener('pointerdown', unlockAudio);
       window.removeEventListener('keydown', unlockAudio);
       window.removeEventListener('touchstart', unlockAudio);
-
       if (soundtrackRef.current) {
         soundtrackRef.current.pause();
         soundtrackRef.current.currentTime = 0;
         soundtrackRef.current = null;
       }
-
       loadingStartedAtRef.current = 0;
       lastAudioSyncRef.current = 0;
     };
   }, [handleComplete, playCinematicStartup, syncSoundtrackToTimeline]);
 
-  // Random initial positions for each letter (falling from different spots)
-  const getLetterEntrance = (index: number) => {
-    const angles = [-35, 20, -15, 30, -25, 10, -20, 25];
-    const offsets = [-200, 150, -100, 250, -180, 120, -220, 180];
-    return {
-      y: -700 - (index * 55),
-      x: offsets[index % offsets.length],
-      rotate: angles[index % angles.length],
-      scale: 0.2,
-      opacity: 0,
-    };
-  };
+  // Kinetic word cycling, only while counting
+  useEffect(() => {
+    if (phase !== 'count') return;
+    const id = setInterval(() => setWordIndex((i) => (i + 1) % WORDS.length), 1150);
+    return () => clearInterval(id);
+  }, [phase]);
 
-  const letterLanded = {
-    y: 0,
-    x: 0,
-    rotate: 0,
-    scale: 1,
-    opacity: 1,
-  };
-
-  const getLetterExit = (index: number) => {
-    const directions = [
-      { x: -400, y: -300, rotate: -45 },
-      { x: 300, y: -500, rotate: 30 },
-      { x: -200, y: 400, rotate: -60 },
-      { x: 500, y: -200, rotate: 50 },
-      { x: -350, y: 300, rotate: -35 },
-      { x: 250, y: 500, rotate: 40 },
-      { x: -500, y: -100, rotate: -55 },
-      { x: 400, y: 350, rotate: 65 },
-    ];
-    const dir = directions[index % directions.length];
-    return {
-      ...dir,
-      scale: 0.25,
-      opacity: 0,
-    };
-  };
-
-  const getLetterHover = (index: number) => ({
-    y: [0, -4 - (index % 4), -9 - (index % 3), -3, -7, 0],
-    rotate: [0, index % 2 === 0 ? 0.4 : -0.4, 0, index % 2 === 0 ? -0.6 : 0.6, 0.2, 0],
-    textShadow: [
-      '0 0 14px rgba(198,255,0,0.08)',
-      '0 0 30px rgba(198,255,0,0.24)',
-      '0 0 24px rgba(198,255,0,0.16)',
-      '0 0 34px rgba(198,255,0,0.3)',
-      '0 0 18px rgba(198,255,0,0.14)',
-      '0 0 12px rgba(198,255,0,0.08)'
-    ],
-  });
-
-  const isActTwo = progress >= 0.45 && phase === 'holding';
-  const stageLabel =
-    progress < 0.45
-      ? 'SCANNING SIGNAL'
-      : progress < 0.75
-        ? 'SYNTHESIZING SYSTEM'
-        : progress < 0.92
-          ? 'CALIBRATING OUTPUT'
-          : 'LAUNCHING';
+  const pct = Math.round(progress * 100);
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-[9999] overflow-hidden"
           style={{ background: 'var(--background)' }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          initial={false}
+          animate={{ y: phase === 'exit' ? '-100%' : 0 }}
+          transition={{ duration: phase === 'exit' ? CURTAIN_MS / 1000 : 0, ease: SWAP }}
+          exit={{ opacity: 0, transition: { duration: 0.3 } }}
         >
+          {/* Breathing accent glow */}
           <motion.div
-            className="absolute inset-0"
-            animate={
-              phase === 'exiting'
-                ? { opacity: [0.85, 0.3], scale: [1, 1.07] }
-                : phase === 'holding'
-                  ? { opacity: [0.56, 0.78, 0.62, 0.88, 0.7], scale: [1, 1.04, 1.02, 1.07, 1.03] }
-                  : { opacity: [0.35, 0.54, 0.5], scale: [0.95, 1.01, 1] }
-            }
-            transition={
-              phase === 'exiting'
-                ? { duration: 1.2, ease: 'easeInOut' }
-                : phase === 'holding'
-                  ? { duration: HOLD_DURATION, ease: [0.2, 0.8, 0.2, 1], times: [0, 0.2, 0.45, 0.75, 1] }
-                  : { duration: HOLD_START / 1000, ease: [0.22, 1, 0.36, 1] }
-            }
-            style={{
-              background:
-                'radial-gradient(circle at 50% 42%, rgba(198,255,0,0.19) 0%, rgba(198,255,0,0.05) 24%, rgba(3,7,18,0.95) 68%)',
-            }}
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'radial-gradient(circle at 50% 44%, rgba(198,255,0,0.16) 0%, rgba(198,255,0,0.03) 30%, transparent 60%)' }}
+            animate={{ opacity: [0.5, 0.9, 0.6], scale: [1, 1.06, 1.01] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
           />
 
-          <motion.div
-            className="absolute h-[110vmin] w-[110vmin] rounded-full border pointer-events-none"
-            style={{ borderColor: 'rgba(198,255,0,0.22)' }}
-            animate={
-              phase === 'exiting'
-                ? { scale: [1, 1.35], opacity: [0.35, 0] }
-                : phase === 'holding'
-                  ? { rotate: [24, 150, 278, 410], scale: [1, 1.02, 1.05, 1.01], opacity: [0.28, 0.42, 0.35, 0.24] }
-                  : { rotate: [0, 24], opacity: [0.08, 0.26] }
-            }
-            transition={
-              phase === 'exiting'
-                ? { duration: 1.3, ease: [0.32, 0.72, 0, 1] }
-                : phase === 'holding'
-                  ? { duration: HOLD_DURATION, ease: [0.2, 0.8, 0.2, 1], times: [0, 0.32, 0.7, 1] }
-                  : { duration: HOLD_START / 1000, ease: [0.22, 1, 0.36, 1] }
-            }
-          />
+          {/* Fine grid + vignette + grain for depth */}
+          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_45%,#000_20%,transparent_85%)] opacity-40" />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 45%, transparent 35%, rgba(3,7,18,0.85) 100%)' }} />
+          <div className="absolute inset-0 grain-overlay opacity-[0.12] pointer-events-none" />
 
-          <motion.div
-            className="absolute h-[84vmin] w-[84vmin] rounded-full border pointer-events-none"
-            style={{ borderColor: 'rgba(255,255,255,0.08)' }}
-            animate={
-              phase === 'exiting'
-                ? { scale: [1, 1.25], opacity: [0.3, 0] }
-                : phase === 'holding'
-                  ? { rotate: [338, 270, 146, 38], scale: [1, 0.98, 1.03, 1], opacity: [0.14, 0.3, 0.22, 0.12] }
-                  : { rotate: [360, 338], opacity: [0.04, 0.14] }
-            }
-            transition={
-              phase === 'exiting'
-                ? { duration: 1.1, ease: [0.32, 0.72, 0, 1], delay: 0.08 }
-                : phase === 'holding'
-                  ? { duration: HOLD_DURATION, ease: [0.2, 0.8, 0.2, 1], times: [0, 0.28, 0.67, 1] }
-                  : { duration: HOLD_START / 1000, ease: [0.22, 1, 0.36, 1] }
-            }
-          />
-
-          <motion.div
-            className="absolute left-[-15%] right-[-15%] h-px pointer-events-none"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent 0%, rgba(198,255,0,0.05) 30%, rgba(198,255,0,0.45) 50%, rgba(198,255,0,0.05) 70%, transparent 100%)',
-            }}
-            animate={
-              phase === 'exiting'
-                ? { opacity: [0.55, 0], y: ['48%', '18%'] }
-                : phase === 'holding'
-                  ? { opacity: [0.1, 0.72, 0.2, 0.64, 0.08], y: ['76%', '60%', '38%', '54%', '26%'] }
-                  : { opacity: [0, 0.25], y: ['84%', '76%'] }
-            }
-            transition={
-              phase === 'exiting'
-                ? { duration: 1, ease: 'easeOut' }
-                : phase === 'holding'
-                  ? { duration: HOLD_DURATION - 0.2, ease: [0.21, 0.88, 0.23, 1], times: [0, 0.23, 0.5, 0.78, 1], delay: 0.1 }
-                  : { duration: HOLD_START / 1000, ease: [0.22, 1, 0.36, 1] }
-            }
-          />
-
-          <AnimatePresence>
-            {showAudioPrompt && phase !== 'exiting' && (
-              <motion.button
-                type="button"
-                onClick={() => void playCinematicStartup()}
-                className="absolute top-[max(0.9rem,env(safe-area-inset-top))] right-[max(0.9rem,env(safe-area-inset-right))] rounded-full border px-4 py-2 text-[11px] tracking-[0.16em] z-30"
-                style={{
-                  borderColor: 'rgba(198,255,0,0.38)',
-                  color: 'rgba(229,255,160,0.9)',
-                  background: 'rgba(5,12,16,0.78)',
-                  boxShadow: '0 0 30px rgba(198,255,0,0.14)',
-                }}
-                initial={{ opacity: 0, y: -12, scale: 0.94 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              >
-                ENABLE CINEMATIC AUDIO
-              </motion.button>
-            )}
-          </AnimatePresence>
-
-          <motion.div
-            className="absolute left-[-20%] right-[-20%] h-px rotate-[13deg] pointer-events-none"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent 0%, rgba(198,255,0,0.03) 25%, rgba(198,255,0,0.35) 52%, rgba(198,255,0,0.03) 75%, transparent 100%)',
-            }}
-            animate={
-              phase === 'exiting'
-                ? { opacity: [0.4, 0], y: ['42%', '10%'] }
-                : isActTwo
-                  ? { opacity: [0.05, 0.5, 0.18], y: ['72%', '44%', '58%'] }
-                  : { opacity: 0, y: '76%' }
-            }
-            transition={
-              phase === 'exiting'
-                ? { duration: 0.9, ease: 'easeOut' }
-                : isActTwo
-                  ? { duration: HOLD_DURATION * 0.72, ease: [0.23, 0.9, 0.25, 1], times: [0, 0.62, 1] }
-                  : { duration: 0.4 }
-            }
-          />
-
-          {Array.from({ length: 20 }).map((_, i) => (
-            <motion.div
-              key={`particle-${i}`}
+          {/* Slowly drifting motes */}
+          {Array.from({ length: 10 }).map((_, i) => (
+            <motion.span
+              key={i}
               className="absolute rounded-full"
               style={{
-                width: i % 4 === 0 ? 3 : 2,
-                height: i % 4 === 0 ? 3 : 2,
-                background: i % 3 === 0 ? 'var(--accent)' : 'rgba(255,255,255,0.15)',
-                left: `${10 + (i * 4.2) % 80}%`,
-                top: `${5 + (i * 7.3) % 90}%`,
+                width: i % 3 === 0 ? 3 : 2,
+                height: i % 3 === 0 ? 3 : 2,
+                left: `${8 + (i * 9.1) % 84}%`,
+                top: `${12 + (i * 13.7) % 72}%`,
+                background: i % 2 === 0 ? 'var(--accent)' : 'rgba(255,255,255,0.4)',
               }}
-              animate={{
-                y: phase === 'exiting' ? [0, -60 - (i % 5) * 10] : [0, -36, 0],
-                x: phase === 'exiting'
-                  ? [0, (i % 2 === 0 ? -45 : 45)]
-                  : isActTwo
-                    ? [0, i % 2 === 0 ? 14 : -14, i % 2 === 0 ? -8 : 8, 0]
-                    : [0, i % 2 === 0 ? 6 : -6, 0],
-                opacity: phase === 'exiting' ? [0.7, 0] : isActTwo ? [0, 0.75, 0.12, 0] : [0, 0.6, 0],
-                scale: phase === 'exiting' ? [1, 0] : isActTwo ? [0, 1.65, 0.8, 0] : [0, 1.5, 0],
-              }}
-              transition={{
-                duration:
-                  phase === 'exiting'
-                    ? 0.9
-                    : phase === 'holding'
-                      ? isActTwo
-                        ? HOLD_DURATION * 0.62 + (i % 5) * 0.06
-                        : HOLD_DURATION - 0.55 + (i % 5) * 0.08
-                      : 2.5 + (i % 3) * 0.12,
-                delay:
-                  phase === 'exiting'
-                    ? i * 0.012
-                    : phase === 'holding'
-                      ? isActTwo
-                        ? i * 0.022
-                        : i * 0.035
-                      : i * 0.12,
-                ease: 'easeInOut',
-              }}
+              animate={{ y: [0, -26, 0], opacity: [0, 0.55, 0], scale: [0.6, 1.2, 0.6] }}
+              transition={{ duration: 4 + (i % 4), repeat: Infinity, delay: i * 0.3, ease: 'easeInOut' }}
             />
           ))}
 
-          {/* Main name container */}
-          <div className="relative flex flex-col items-center gap-0 select-none">
-            {/* RISHABH - top line */}
-            <div className="flex items-end gap-[2px] sm:gap-1" style={{ perspective: '1000px' }}>
-              {NAME_TOP.split('').map((letter, i) => (
-                <motion.span
-                  key={`top-${i}`}
-                  className="font-display font-black text-5xl sm:text-7xl md:text-[8rem] lg:text-[10rem] leading-none tracking-tighter"
-                  style={{ 
-                    color: 'var(--foreground)',
-                    textShadow: phase === 'holding' ? '0 0 46px rgba(198,255,0,0.3)' : '0 0 0 rgba(198,255,0,0)',
-                    display: 'inline-block',
-                  }}
-                  initial={getLetterEntrance(i)}
-                  animate={
-                    phase === 'exiting'
-                      ? getLetterExit(i)
-                      : phase === 'holding'
-                        ? getLetterHover(i)
-                        : letterLanded
-                  }
-                  transition={
-                    phase === 'exiting'
-                      ? {
-                          duration: 0.95,
-                          delay: i * 0.04,
-                          ease: [0.55, 0, 1, 0.45],
-                        }
-                      : phase === 'holding'
-                        ? {
-                            duration: HOLD_DURATION,
-                            ease: [0.18, 0.88, 0.22, 1],
-                            times: [0, 0.18, 0.38, 0.58, 0.8, 1],
-                            delay: i * 0.03,
-                          }
-                      : {
-                          type: 'spring',
-                          stiffness: 110,
-                          damping: 11,
-                          mass: 1.15,
-                          delay: i * 0.1,
-                        }
-                  }
-                >
-                  {letter}
-                </motion.span>
-              ))}
-            </div>
-
-            {/* RAI - bottom line */}
-            <div className="flex items-start gap-[2px] sm:gap-1 -mt-2 sm:-mt-4" style={{ perspective: '1000px' }}>
-              {NAME_BOTTOM.split('').map((letter, i) => (
-                <motion.span
-                  key={`bottom-${i}`}
-                  className="font-display italic font-black text-5xl sm:text-7xl md:text-[8rem] lg:text-[10rem] leading-none tracking-tighter"
-                  style={{ 
-                    color: 'var(--accent)',
-                    textShadow: phase === 'holding' ? '0 0 34px rgba(198,255,0,0.45)' : '0 0 0 rgba(198,255,0,0)',
-                    display: 'inline-block',
-                  }}
-                  initial={getLetterEntrance(i + NAME_TOP.length)}
-                  animate={
-                    phase === 'exiting'
-                      ? getLetterExit(i + NAME_TOP.length)
-                      : phase === 'holding'
-                        ? getLetterHover(i + NAME_TOP.length)
-                        : letterLanded
-                  }
-                  transition={
-                    phase === 'exiting'
-                      ? {
-                          duration: 0.95,
-                          delay: (i + NAME_TOP.length) * 0.04,
-                          ease: [0.55, 0, 1, 0.45],
-                        }
-                      : phase === 'holding'
-                        ? {
-                            duration: HOLD_DURATION,
-                            ease: [0.18, 0.88, 0.22, 1],
-                            times: [0, 0.18, 0.38, 0.58, 0.8, 1],
-                            delay: (i + NAME_TOP.length) * 0.03,
-                          }
-                      : {
-                          type: 'spring',
-                          stiffness: 110,
-                          damping: 11,
-                          mass: 1.15,
-                          delay: (i + NAME_TOP.length) * 0.1 + 0.08,
-                        }
-                  }
-                >
-                  {letter}
-                </motion.span>
-              ))}
-            </div>
-
-            {/* Accent underline that draws itself */}
-            <motion.div
-              className="h-[2px] mt-4 sm:mt-6 rounded-full"
-              initial={{ scaleX: 0, opacity: 0 }}
-              animate={
-                phase === 'exiting'
-                  ? { scaleX: 0, opacity: 0, y: -14 }
-                  : phase === 'holding'
-                    ? { scaleX: [1, 1.06, 0.92, 1.08, 1], opacity: [0.58, 0.9, 0.62, 1, 0.72] }
-                    : { scaleX: 1, opacity: 1 }
-              }
-              transition={
-                phase === 'exiting'
-                  ? { duration: 0.55 }
-                  : phase === 'holding'
-                    ? { duration: HOLD_DURATION, ease: [0.22, 0.86, 0.2, 1], times: [0, 0.24, 0.49, 0.76, 1] }
-                    : { duration: 1.35, delay: 1.2, ease: [0.16, 1, 0.3, 1] }
-              }
-              style={{ background: 'var(--accent)', originX: 0, width: '100%' }}
-            />
-          </div>
-
-          {/* Subtitle */}
-          <motion.p
-            className="text-[10px] sm:text-xs tracking-[0.4em] uppercase font-bold mt-8 sm:mt-12"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={
-              phase === 'exiting'
-                ? { opacity: 0, y: -20, letterSpacing: '0.55em' }
-                : phase === 'holding'
-                  ? { opacity: [0.35, 0.85, 0.5, 0.92, 0.4], y: [0, -2, 0, -1, 0], letterSpacing: ['0.34em', '0.42em', '0.37em', '0.45em', '0.36em'] }
-                  : { opacity: 1, y: 0, letterSpacing: '0.36em' }
-            }
-            transition={
-              phase === 'holding'
-                ? { duration: HOLD_DURATION, ease: [0.21, 0.88, 0.22, 1], times: [0, 0.25, 0.5, 0.76, 1] }
-                : { duration: 0.8, delay: phase === 'exiting' ? 0 : 1.9 }
-            }
-          >
-            Product Manager
-          </motion.p>
-
-          <motion.p
-            className="text-[9px] sm:text-[10px] tracking-[0.36em] uppercase font-bold mt-3 tabular-nums"
-            style={{ color: 'rgba(198,255,0,0.62)' }}
-            initial={{ opacity: 0, y: 8 }}
-            animate={
-              phase === 'exiting'
-                ? { opacity: 0, y: -8 }
-                : { opacity: [0.4, 0.9, 0.6], y: [0, -1, 0] }
-            }
-            transition={
-              phase === 'exiting'
-                ? { duration: 0.4 }
-                : { duration: 1.8, ease: 'easeInOut' }
-            }
-          >
-            {stageLabel}
-          </motion.p>
-
-          {/* Progress bar */}
-          <div className="absolute bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 w-48 sm:w-64 flex flex-col items-center gap-4">
-            <div className="w-full h-[1px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
-              <motion.div
-                className="h-full rounded-full"
-                style={{
-                  background: 'var(--accent)',
-                  width: `${progress * 100}%`,
-                  boxShadow: phase === 'holding' ? '0 0 28px var(--accent-muted)' : '0 0 16px var(--accent-muted)',
-                }}
-              />
-            </div>
-            <motion.span
-              className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase font-bold tabular-nums"
-              style={{ color: 'rgba(255,255,255,0.2)' }}
-              initial={{ opacity: 0 }}
-              animate={
-                phase === 'exiting'
-                  ? { opacity: 0 }
-                  : { opacity: 1 }
-              }
-              transition={{ delay: 0.5 }}
-            >
-              {Math.round(progress * 100)}%
-            </motion.span>
-          </div>
-
-          {/* Corner accents */}
+          {/* Brand — top left */}
           <motion.div
-            className="absolute top-6 left-6 sm:top-10 sm:left-10 w-8 h-8 sm:w-12 sm:h-12 border-l border-t"
-            style={{ borderColor: 'rgba(255,255,255,0.08)' }}
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
-          />
-          <motion.div
-            className="absolute bottom-6 right-6 sm:bottom-10 sm:right-10 w-8 h-8 sm:w-12 sm:h-12 border-r border-b"
-            style={{ borderColor: 'rgba(255,255,255,0.08)' }}
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
-          />
+            className="absolute top-[max(1.4rem,env(safe-area-inset-top))] left-[max(1.4rem,5vw)] flex items-center gap-3 z-20"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            <span className="font-display font-bold text-lg tracking-tight text-white">
+              RR<span className="text-accent">.</span>
+            </span>
+            <span className="h-3 w-px bg-white/20" />
+            <span className="text-[10px] tracking-[0.32em] uppercase text-white/40 font-bold">Portfolio &apos;26</span>
+          </motion.div>
 
-          {/* Skip intro — respects the cinematic for those who want it, frees those who don't */}
+          {/* Audio prompt — top right */}
           <AnimatePresence>
-            {phase !== 'exiting' && (
+            {showAudioPrompt && phase !== 'exit' && (
               <motion.button
                 type="button"
-                onClick={handleSkip}
-                className="group absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1.25rem,env(safe-area-inset-right))] z-30 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] transition-colors duration-300"
-                style={{
-                  borderColor: 'rgba(255,255,255,0.12)',
-                  color: 'rgba(255,255,255,0.55)',
-                  background: 'rgba(5,12,16,0.45)',
-                  backdropFilter: 'blur(6px)',
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0, transition: { duration: 0.5, delay: 1.6, ease: [0.22, 1, 0.36, 1] } }}
-                exit={{ opacity: 0, y: 8, transition: { duration: 0.25 } }}
-                whileHover={{ color: '#C6FF00', borderColor: 'rgba(198,255,0,0.45)' }}
+                onClick={() => void playCinematicStartup()}
+                className="absolute top-[max(1.2rem,env(safe-area-inset-top))] right-[max(1.2rem,5vw)] z-30 rounded-full border px-4 py-2 text-[10px] tracking-[0.18em] font-bold uppercase"
+                style={{ borderColor: 'rgba(198,255,0,0.4)', color: 'rgba(229,255,160,0.95)', background: 'rgba(5,12,16,0.6)' }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
               >
-                Skip Intro
-                <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
+                Enable Sound
               </motion.button>
             )}
           </AnimatePresence>
+
+          {/* Center stage — kinetic words give way to the name */}
+          <div className="absolute inset-0 flex items-center justify-center px-6 z-10">
+            <AnimatePresence mode="wait">
+              {phase === 'count' ? (
+                <motion.div
+                  key="words"
+                  className="text-center select-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, filter: 'blur(10px)', scale: 0.96, transition: { duration: 0.45 } }}
+                >
+                  <div className="mb-6 flex items-center justify-center gap-3">
+                    <span className="h-px w-8 bg-accent/60" />
+                    <span className="text-[10px] md:text-xs tracking-[0.4em] uppercase text-accent/80 font-bold">Loading Experience</span>
+                    <span className="h-px w-8 bg-accent/60" />
+                  </div>
+                  <div className="relative mx-auto overflow-hidden h-[1.05em] text-[12vw] md:text-[8vw] leading-none" style={{ width: 'min(88vw, 1000px)' }}>
+                    <AnimatePresence initial={false}>
+                      <motion.span
+                        key={wordIndex}
+                        initial={{ y: '105%' }}
+                        animate={{ y: '0%' }}
+                        exit={{ y: '-105%' }}
+                        transition={{ duration: 0.6, ease: SWAP }}
+                        className="absolute inset-0 flex items-center justify-center font-display italic font-medium text-white/90"
+                      >
+                        {WORDS[wordIndex]}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div key="name" className="text-center select-none" initial={{ opacity: 1 }}>
+                  <div className="overflow-hidden">
+                    <motion.h1
+                      initial={{ y: '115%' }}
+                      animate={{ y: '0%' }}
+                      transition={{ duration: 0.95, ease: RISE }}
+                      className="font-display font-black text-[15vw] md:text-[11vw] leading-[0.86] tracking-tighter text-white"
+                      style={{ textShadow: '0 0 60px rgba(198,255,0,0.18)' }}
+                    >
+                      {NAME_TOP}
+                    </motion.h1>
+                  </div>
+                  <div className="overflow-hidden pr-[0.06em]">
+                    <motion.h1
+                      initial={{ y: '115%' }}
+                      animate={{ y: '0%' }}
+                      transition={{ duration: 0.95, delay: 0.09, ease: RISE }}
+                      className="font-display italic font-black text-[15vw] md:text-[11vw] leading-[0.86] tracking-tighter text-accent"
+                      style={{ textShadow: '0 0 50px rgba(198,255,0,0.4)' }}
+                    >
+                      {NAME_BOTTOM}
+                    </motion.h1>
+                  </div>
+                  <motion.p
+                    className="mt-6 text-[10px] md:text-xs tracking-[0.42em] uppercase text-white/45 font-bold"
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.5 }}
+                  >
+                    Product Manager
+                  </motion.p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Counter — bottom left */}
+          <motion.div
+            className="absolute bottom-[max(1.6rem,7vh)] left-[max(1.4rem,5vw)] flex items-end gap-1.5 z-20"
+            animate={{ opacity: phase === 'exit' ? 0 : 1, y: phase === 'exit' ? 12 : 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="font-body font-black tabular-nums leading-[0.8] text-4xl md:text-6xl text-white">
+              {String(pct).padStart(3, '0')}
+            </span>
+            <span className="mb-1 text-accent text-sm md:text-lg font-black">%</span>
+          </motion.div>
+
+          {/* Status — bottom right */}
+          <div className="absolute bottom-[max(1.6rem,7vh)] right-[max(1.4rem,5vw)] z-20">
+            <motion.span
+              className="text-[10px] md:text-xs tracking-[0.3em] uppercase text-white/40 font-bold tabular-nums"
+              animate={{ opacity: phase === 'exit' ? 0 : 1 }}
+            >
+              {phase === 'count' ? 'Initializing' : phase === 'reveal' ? 'Rendering' : 'Ready'}
+            </motion.span>
+          </div>
+
+          {/* Progress line — bottom edge, becomes the leading edge of the curtain lift */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-white/8 z-20">
+            <div
+              className="h-full bg-accent"
+              style={{
+                width: `${Math.max(progress, phase === 'exit' ? 1 : 0) * 100}%`,
+                boxShadow: '0 0 20px var(--accent), 0 0 6px var(--accent)',
+              }}
+            />
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
