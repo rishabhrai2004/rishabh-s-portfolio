@@ -36,15 +36,6 @@ const caseStudies = [
 const builds = [
   {
     id: 4,
-    title: 'CareerOS — AI Product Intelligence',
-    subtitle: 'AI Product · Live App',
-    description: 'Product-driven career intelligence platform — uses LLM APIs to forecast market demand, surface skill-gap opportunities, and generate personalized growth pathways. Designed with a product-first approach focused on user retention and engagement metrics.',
-    tools: ['LLM APIs', 'Product Strategy', 'User Metrics', 'Full Stack'],
-    link: 'https://career-voyage-ai-12.lovable.app/',
-    type: 'External'
-  },
-  {
-    id: 5,
     title: 'AI Startup Idea Validator',
     subtitle: 'AI Product · Live App',
     description: 'Product validation engine that automates market sizing, competitor benchmarking, and product-market fit analysis. Structured to help founders make data-informed go/no-go decisions on new product bets.',
@@ -53,7 +44,7 @@ const builds = [
     type: 'External'
   },
   {
-    id: 6,
+    id: 5,
     title: 'RETAIL PRODUCT ANALYTICS',
     subtitle: 'Analytics',
     description: 'End-to-end product analytics framework for retail — standardized cross-platform product datasets via Azure SQL and built Power BI dashboards that track pricing strategy impact, margin trends, and product performance KPIs.',
@@ -62,7 +53,7 @@ const builds = [
     type: 'Github'
   },
   {
-    id: 7,
+    id: 6,
     title: 'AGRI-YIELD PREDICTION HUB',
     subtitle: 'Analytics',
     description: 'Product analytics pipeline for agricultural insights — processed environmental and telemetry datasets via Snowflake and AWS S3 to deliver geospatial productivity metrics and predictive yield forecasting for product decision-making.',
