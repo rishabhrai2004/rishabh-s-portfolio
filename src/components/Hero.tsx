@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -64,25 +65,29 @@ export default function Hero() {
         className="absolute left-5 sm:left-12 md:left-24 top-[56%] sm:top-[58%] md:top-[57%] -translate-y-1/2 z-50 max-w-[92vw] sm:max-w-xl"
       >
         <div className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 mb-4 sm:mb-5 border border-[color:var(--border)] rounded-full bg-black/35 backdrop-blur-md">
-          <div className="w-6 md:w-8 h-px bg-accent" />
-          <span className="text-accent tracking-[0.16em] sm:tracking-[0.24em] md:tracking-[0.3em] text-[10px] md:text-xs font-semibold uppercase">Product &amp; Data Analyst</span>
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+          </span>
+          <span className="text-accent tracking-[0.16em] sm:tracking-[0.24em] md:tracking-[0.3em] text-[10px] md:text-xs font-semibold uppercase">Product Manager</span>
         </div>
         <h2 className="text-[clamp(1.9rem,8.7vw,4.4rem)] font-display italic font-medium leading-[0.96] sm:leading-[0.94] text-white mb-4 sm:mb-5 drop-shadow-[0_10px_40px_rgba(0,0,0,0.45)]">
           Bridging product intuition with data-driven precision.
         </h2>
         <p className="text-sm sm:text-base text-white/70 max-w-lg leading-relaxed mb-5 sm:mb-6 tracking-[0.01em] sm:tracking-[0.02em]">
-          I design product decisions that are elegant in strategy and rigorous in evidence.
+          Product Management candidate turning user research and analytics into product decisions with measurable impact.
         </p>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <a
             href="#projects"
-            className="px-6 py-3 rounded-full bg-accent text-black text-[11px] uppercase tracking-[0.22em] font-semibold shadow-[0_0_30px_var(--accent-muted)]"
+            className="btn-shine group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-accent text-black text-[11px] uppercase tracking-[0.22em] font-semibold shadow-[0_0_30px_var(--accent-muted)] transition-transform duration-300 hover:scale-[1.03]"
           >
-            Explore Work
+            <span className="relative z-[2]">Explore Work</span>
+            <ArrowUpRight className="relative z-[2] w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
           <a
             href="#contact"
-            className="px-6 py-3 rounded-full border border-[color:var(--border)] text-white/85 text-[11px] uppercase tracking-[0.18em] sm:tracking-[0.24em] font-semibold bg-black/30 backdrop-blur-sm hover:text-accent transition-colors"
+            className="px-6 py-3 rounded-full border border-[color:var(--border)] text-white/85 text-[11px] uppercase tracking-[0.18em] sm:tracking-[0.24em] font-semibold bg-black/30 backdrop-blur-sm hover:text-accent hover:border-accent/30 transition-colors"
           >
             Start a Conversation
           </a>

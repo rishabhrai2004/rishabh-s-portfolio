@@ -5,6 +5,7 @@ import LoadingScreen from '@/components/LoadingScreen';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import About from '@/components/About';
+import Stats from '@/components/Stats';
 import Skills from '@/components/Skills';
 import Projects from '@/components/Projects';
 import Experience from '@/components/Experience';
@@ -13,6 +14,7 @@ import Contact from '@/components/Contact';
 import ScrollyCanvas from '@/components/ScrollyCanvas';
 import AmbientFx from '@/components/AmbientFx';
 import Chatbot from '@/components/Chatbot';
+import Cursor from '@/components/Cursor';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +22,7 @@ export default function Home() {
   return (
     <>
       <LoadingScreen onComplete={() => setIsLoading(false)} />
+      <Cursor />
       <Chatbot isLoading={isLoading} />
       
       <main
@@ -30,13 +33,16 @@ export default function Home() {
           pointerEvents: isLoading ? 'none' : 'auto',
         }}
       >
-        {!isLoading && <ScrollyCanvas />}
+        {/* Mounted during loading too, so the 74→3 MB frame set preloads
+            behind the intro and the background is ready the instant it ends. */}
+        <ScrollyCanvas />
         {!isLoading && <AmbientFx />}
         
         <div className="relative z-10">
           <Navbar />
           <Hero />
           <About />
+          <Stats />
           <Skills />
           <Projects />
           <Experience />

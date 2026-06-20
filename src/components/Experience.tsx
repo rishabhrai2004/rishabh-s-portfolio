@@ -4,24 +4,28 @@ import { motion } from 'framer-motion';
 
 const experiences = [
   {
-    company: 'INDIAN OIL CORPORATION',
-    role: 'PRODUCT & DATA ANALYTICS INTERN',
-    desc: 'Analyzed refinery operational datasets using Python and SQL to identify process bottlenecks and optimization opportunities. Built automated Power BI dashboards tracking key operational KPIs, enabling data-backed product and process improvement decisions.'
+    company: 'INDIAN OIL CORPORATION (IOCL)',
+    role: 'DATA ANALYTICS INTERN',
+    meta: 'Digboi Refinery, Assam · Jun–Jul 2025',
+    desc: 'Analysed operational datasets using SQL and Python (Pandas) to support 3 internal analytics tools — documenting requirements and conducting user research that improved reporting accuracy by 25% and reduced manual effort by 15 hours weekly. Built Power BI dashboards tracking operational KPIs, coordinated UAT with QA stakeholders, and joined sprint planning, stand-ups, and product reviews to drive data-driven iteration.'
   },
   {
     company: 'MKTEA',
-    role: 'HR ANALYTICS INTERN',
-    desc: 'Synthesized workforce data for 20,000+ employees to surface recruitment funnel inefficiencies and retention patterns. Delivered executive-level insights that informed product-level changes in the HR pipeline, reducing overhead variance.'
+    role: 'DATA & PRODUCT INTERN',
+    meta: 'Doomdooma, Assam · B2B Tea FMCG · May–Jun 2025',
+    desc: 'Analysed operational datasets covering 20,000+ entries and identified process bottlenecks that informed product requirement recommendations, driving 30% operational efficiency gains. Built Power BI dashboards tracking KPI and OKR metrics for leadership, and ran market and competitive analysis to prioritise backlog improvements across 4 departments.'
   },
   {
     company: 'KIIT ENTREPRENEURSHIP CELL',
-    role: 'DIRECTOR — GROWTH & ANALYTICS',
-    desc: 'Led growth strategy for a 10,000+ member ecosystem. Built a data-driven campaign framework that optimized registration funnels, tracked user engagement metrics across events, and introduced A/B-tested outreach strategies that scaled participation by 35%.'
+    role: 'CHIEF MARKETING OFFICER',
+    meta: '2024 – Present',
+    desc: 'Lead campaign experimentation, growth strategy, and startup mentorship for a 10,000+ student ecosystem — mentoring 25+ early-stage startups, running A/B tests on digital campaigns and registration flows, and driving a 40% rise in event registrations across 12+ annual events.'
   },
   {
-    company: 'KIIT INTERNATIONAL MODEL UNITED NATIONS',
-    role: 'DEPUTY DIRECTOR',
-    desc: 'Led operational planning for one of Asia\'s largest MUN conferences. Implemented structured cross-functional coordination systems, defined success metrics for event operations, and drove process improvements for large-scale execution.'
+    company: 'KIIT INTERNATIONAL MUN',
+    role: 'DEPUTY DIRECTOR — OPERATIONS & STRATEGY',
+    meta: '2024 – 2025',
+    desc: 'Directed end-to-end operations for one of Asia\'s largest MUN conferences — coordinating 200+ volunteers across 8 teams and delivering seamless execution for 1,500+ delegates from around the world over 3 days.'
   }
 ];
 
@@ -43,9 +47,14 @@ export default function Experience() {
               transition={{ duration: 0.7, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="group glass-card p-8 md:p-12"
             >
-              <h3 className="text-xl md:text-3xl font-display font-black uppercase tracking-tighter leading-none mb-4 text-accent">
-                {exp.company}
-              </h3>
+              <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 mb-4">
+                <h3 className="text-xl md:text-3xl font-display font-black uppercase tracking-tighter leading-none text-accent">
+                  {exp.company}
+                </h3>
+                <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.18em] text-white/40 whitespace-nowrap">
+                  {exp.meta}
+                </span>
+              </div>
               <h4 className="text-lg md:text-2xl font-body text-white mb-6 md:mb-8 border-b border-white/10 pb-6 md:pb-8">
                 {exp.role}
               </h4>

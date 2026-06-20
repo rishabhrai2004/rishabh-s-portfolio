@@ -111,7 +111,7 @@ export default function ScrollyCanvas() {
       if (bitmapsRef.current[i]) return;
 
       const paddedIndex = i.toString().padStart(3, '0');
-      const url = `/sequence/frame_${paddedIndex}_delay-0.066s.png`;
+      const url = `/sequence/frame_${paddedIndex}_delay-0.066s.webp`;
 
       try {
         const res = await fetch(url);

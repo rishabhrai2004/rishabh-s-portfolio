@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const NVIDIA_API_URL = process.env.NVIDIA_API_URL || 'https://integrate.api.nvidia.com/v1/chat/completions';
-const DEFAULT_MODELS = 'NVIDIABuild-Autogen-82,meta/llama-3.1-70b-instruct,mistralai/mixtral-8x7b-instruct-v0.1';
+const DEFAULT_MODELS = 'meta/llama-3.3-70b-instruct,meta/llama-3.1-70b-instruct,mistralai/mixtral-8x7b-instruct-v0.1,meta/llama-3.1-8b-instruct';
 
 function getCandidateModels() {
   const configuredModels = (process.env.NVIDIA_MODELS || '')
@@ -18,40 +18,36 @@ function getCandidateModels() {
   return Array.from(new Set([...configuredModels, preferredModel, ...defaultModels].filter(Boolean)));
 }
 
-const systemPrompt = `You are Rishabh Rai's portfolio assistant. You represent a product-focused data analyst and strategist. Here's the context:
+const systemPrompt = `You are Rishabh Rai's portfolio assistant. You represent an aspiring Product Manager with strong analytics and AI-product depth. Here's the context:
 
 **About Rishabh:**
-Rishabh Rai works at the intersection of product strategy and data analytics, turning ambiguous product questions into measurable experiments, KPIs, dashboards, and roadmap-ready insights.
+Rishabh Rai is a Product Management candidate at Kalinga Institute of Industrial Technology (KIIT University), pursuing a B.Tech in Electronics & Computer Science (2023–2027). He has experience across product discovery, user research, and analytics-led decision making through internships and AI product projects, and has built and validated AI-enabled workflows using LLM APIs and rapid prototyping tools. He's focused on building technology products with measurable user and business impact.
 
-**Projects:**
-1. Retail Product Analytics - Built an end-to-end retail analytics framework using Azure SQL and Power BI to track pricing strategy impact, margin trends, and product KPIs.
-2. Agri-Yield Prediction Hub - Created an analytics pipeline using Snowflake and AWS S3 for geospatial productivity metrics and yield forecasting for product decisions.
-3. CareerOS - AI Product Intelligence - Designed a product-led career platform using LLM APIs to forecast market demand, identify skill gaps, and generate growth pathways.
-4. AI Startup Idea Validator - Built a product validation engine for market sizing, competitor benchmarking, and PMF analysis to support founder go/no-go decisions.
-5. Craft Tea - Premium D2C Commerce - Led brand positioning, pricing architecture, and conversion UX with an INR 299-INR 4,999 pricing funnel and trust-first commerce journey.
+**Projects (case studies):**
+1. Swiggy vs Eternal — Product Strategy Teardown: Competitive analysis and user research on both apps' architecture; built a product framework mapping each vertical to the right surface by usage frequency and funnel behaviour. Recommended a RICE-prioritized roadmap to thread ticketing into the core app, with success metrics and an A/B testing plan to recover conversion at the point of highest intent.
+2. MakeMyTrip — AI Travel Feature Suite: Problem discovery and PRD specs for a 4-feature suite in MMT's checkout flow (eSIM Activation, AI Itinerary Engine, Crew Live Tracking, SafeMode for Women), with user flows, wireframes, and a phased V1/V2 roadmap. Market-sizing and business-impact models projected ₹816 Cr GMV for eSIM, 4.1x session uplift, and 74% women rebook loyalty improvement.
+3. Craft Tea — AI-Assisted Premium Consumer Commerce Brand: Defined product vision, GTM strategy, and pricing architecture (₹299–₹4,999); rapidly prototyped and iterated using Claude Code and OpenAI Codex based on user testing and structured experimentation.
 
 **Experience:**
-- Indian Oil Corporation: Product & Data Analytics Intern focused on refinery bottlenecks, SQL/Python analysis, and Power BI KPI dashboards.
-- MKTEA: HR Analytics Intern working on 20,000+ employee data to identify recruitment and retention patterns.
-- KIIT Entrepreneurship Cell: Director - Growth & Analytics, scaled participation by 35% using data-driven campaigns and A/B-tested outreach.
-- KIIT International Model United Nations: Deputy Director for large-scale operations and cross-functional process metrics.
+- Indian Oil Corporation (IOCL), Data Analytics Intern (Digboi Refinery, Assam; Jun–Jul 2025): Analysed operational datasets with SQL and Python (Pandas) to support 3 internal analytics tools, improving reporting accuracy by 25% and reducing manual effort by 15 hours/week; built Power BI KPI dashboards and supported UAT, sprint planning, and product reviews.
+- MKTea, Data & Product Intern (Doomdooma, Assam, B2B Tea FMCG; May–Jun 2025): Analysed 20,000+ entries to identify bottlenecks informing product requirements, driving 30% operational efficiency gains; built KPI/OKR dashboards and ran competitive analysis to prioritise backlog across 4 departments.
+- KIIT Entrepreneurship Cell, Chief Marketing Officer (2024–Present): Lead growth and startup mentorship for a 10,000+ student ecosystem, mentoring 25+ startups and driving a 40% rise in event registrations across 12+ annual events via A/B-tested campaigns.
+- KIIT International MUN, Deputy Director — Operations & Strategy (2024–2025): Directed operations for one of Asia's largest MUN conferences, coordinating 200+ volunteers across 8 teams for 1,500+ delegates over 3 days.
 
 **Certifications:**
-- Cisco Data Science
-- Google Generative AI
-- Product & Data Analytics
+- IBM AI Product Manager (IBM)
+- Introduction to Generative AI (Google Cloud)
+- Data Science (Cisco Networking Academy)
+- Data Analyst Bootcamp (Udemy)
 
 **Skills:**
-- Product & Strategy: strategic research, market intelligence, project management, stakeholder communication
-- Founder Office Execution: executive reporting, cross-functional alignment, decision support, strategic planning
-- Data Analysis: Python (Pandas), SQL, Excel, data modeling
-- Dashboards & Storytelling: Power BI, dashboard development, presentation design, business narratives
-- Metrics & Reporting: KPI design, operating metrics, performance reviews, executive reporting
+- Product: Product Roadmap, PRDs, User Stories, User Research, Feature Prioritization (RICE), A/B Testing, Funnel Analysis, KPI Design, GTM Strategy, Agile, Scrum, UAT
+- Analytics & AI: SQL, Python (Pandas), Power BI, Amplitude, Competitive Analysis, JIRA, Notion, LLM APIs, Generative AI, Lovable, Claude Code
 
 **Contact:**
-LinkedIn: https://www.linkedin.com/in/rishabh-rai-961937280/
+Email: rishabhraittt@gmail.com | LinkedIn: https://www.linkedin.com/in/rishabh-rai-961937280/
 
-When users ask about Rishabh's work, experience, projects, skills, or certifications, provide detailed, contextual answers based on this information. Be conversational, professional, and concise. If asked about how to contact, direct them to LinkedIn.`;
+When users ask about Rishabh's work, experience, projects, skills, education, or certifications, give detailed, contextual answers grounded in this information. Be conversational, professional, and concise. If asked how to contact him, share his email and LinkedIn.`;
 
 function hasAny(text: string, words: string[]) {
   return words.some((word) => text.includes(word));
@@ -60,27 +56,31 @@ function hasAny(text: string, words: string[]) {
 function localFallbackReply(input: string) {
   const text = input.toLowerCase();
 
-  if (hasAny(text, ['project', 'portfolio', 'work'])) {
-    return 'Top projects include Retail Product Analytics (Azure SQL + Power BI), Agri-Yield Prediction Hub (Snowflake + AWS S3), CareerOS AI Product Intelligence, AI Startup Idea Validator, and Craft Tea D2C Commerce. Ask for any one project and I can summarize problem, approach, and outcomes.';
+  if (hasAny(text, ['project', 'portfolio', 'work', 'case stud'])) {
+    return 'Selected case studies: Swiggy vs Eternal (product strategy teardown with RICE-prioritized roadmap and A/B test plan), MakeMyTrip AI Travel Feature Suite (PRD specs + market-sizing projecting ₹816 Cr GMV for eSIM), and Craft Tea (product vision, GTM, and pricing architecture, prototyped with Claude Code). Ask about any one and I can break down the problem, approach, and outcomes.';
   }
 
   if (hasAny(text, ['skill', 'tools', 'stack', 'technology'])) {
-    return 'Core stack and capabilities: SQL, Python (Pandas), Excel, Power BI, KPI design, dashboard storytelling, product strategy, market intelligence, and cross-functional execution.';
+    return 'Product: roadmaps, PRDs, user research, RICE prioritization, A/B testing, funnel analysis, KPI design, GTM. Analytics & AI: SQL, Python (Pandas), Power BI, Amplitude, JIRA, Notion, LLM APIs, Generative AI, plus rapid prototyping with Lovable and Claude Code.';
   }
 
   if (hasAny(text, ['experience', 'intern', 'role', 'background'])) {
-    return 'Experience highlights: Indian Oil Corporation (Product & Data Analytics), MKTEA (HR Analytics on 20,000+ records), KIIT E-Cell (Growth & Analytics leadership), and KIIT International MUN (operations and process metrics).';
+    return 'Experience: Indian Oil Corporation (Data Analytics Intern — 25% better reporting accuracy, 15 hrs/week saved), MKTea (Data & Product Intern across 20,000+ entries, 30% efficiency gains), KIIT E-Cell (Chief Marketing Officer for a 10,000+ student ecosystem, 40% rise in registrations), and KIIT International MUN (Deputy Director, Operations & Strategy for 1,500+ delegates).';
+  }
+
+  if (hasAny(text, ['education', 'college', 'university', 'degree', 'kiit', 'study'])) {
+    return 'Rishabh is pursuing a B.Tech in Electronics & Computer Science at KIIT University (2023–2027) as a Product Management candidate.';
   }
 
   if (hasAny(text, ['cert', 'certificate'])) {
-    return 'Certifications include Cisco Data Science, Google Generative AI, and Product & Data Analytics.';
+    return 'Certifications: IBM AI Product Manager, Google Cloud Introduction to Generative AI, Cisco Data Science, and a Udemy Data Analyst Bootcamp.';
   }
 
-  if (hasAny(text, ['contact', 'linkedin', 'hire', 'reach'])) {
-    return 'You can connect directly on LinkedIn: https://www.linkedin.com/in/rishabh-rai-961937280/';
+  if (hasAny(text, ['contact', 'linkedin', 'hire', 'reach', 'email', 'mail'])) {
+    return 'Reach Rishabh by email at rishabhraittt@gmail.com or on LinkedIn: https://www.linkedin.com/in/rishabh-rai-961937280/';
   }
 
-  return 'I can help with projects, skills, experience, certifications, and contact details. Try asking: Top projects summary, tech stack, or how to contact.';
+  return 'I can help with projects, skills, experience, education, certifications, and contact details. Try asking: summarize the case studies, the product toolkit, or how to get in touch.';
 }
 
 async function requestNvidiaChat(apiKey: string, userMessage: string) {

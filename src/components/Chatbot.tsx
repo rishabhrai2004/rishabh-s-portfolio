@@ -17,10 +17,10 @@ interface ChatbotProps {
 }
 
 const quickPrompts = [
-  'Tell me about your projects',
-  'What tech stack do you use?',
+  'Walk me through your case studies',
+  'What is your product toolkit?',
   'Show your experience',
-  'How do I contact you?',
+  'How do I reach you?',
 ];
 
 export default function Chatbot({ isLoading = false }: ChatbotProps) {

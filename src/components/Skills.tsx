@@ -1,38 +1,44 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Database, Code2, LineChart, Target, BarChart3, BriefcaseBusiness } from 'lucide-react';
+import { Target, Search, FlaskConical, BarChart3, Sparkles, Workflow } from 'lucide-react';
+
+const marqueeItems = [
+  'Product Roadmap', 'PRDs', 'User Research', 'RICE', 'A/B Testing', 'Funnel Analysis',
+  'KPI Design', 'GTM Strategy', 'SQL', 'Python', 'Power BI', 'Amplitude',
+  'LLM APIs', 'Generative AI', 'JIRA', 'Notion',
+];
 
 const categories = [
   {
-    title: 'PRODUCT & STRATEGY',
+    title: 'PRODUCT STRATEGY',
     icon: <Target className="w-8 h-8 text-accent" />,
-    skills: ['Strategic Research & Analysis', 'Market Intelligence', 'Project Management', 'Stakeholder Communication']
+    skills: ['Product Roadmap', 'PRDs & User Stories', 'Feature Prioritization', 'GTM Strategy']
   },
   {
-    title: 'FOUNDERS OFFICE EXECUTION',
-    icon: <BriefcaseBusiness className="w-8 h-8 text-accent" />,
-    skills: ['Executive Reporting', 'Cross-functional Alignment', 'Decision Support', 'Strategic Planning']
+    title: 'DISCOVERY & RESEARCH',
+    icon: <Search className="w-8 h-8 text-accent" />,
+    skills: ['User Research', 'Problem Discovery', 'Competitive Analysis', 'Market Sizing']
   },
   {
-    title: 'DATA ANALYSIS & MODELING',
-    icon: <Code2 className="w-8 h-8 text-accent" />,
-    skills: ['Data Analysis & Modeling', 'Python (Pandas)', 'SQL', 'Microsoft Excel']
+    title: 'EXPERIMENTATION & METRICS',
+    icon: <FlaskConical className="w-8 h-8 text-accent" />,
+    skills: ['A/B Testing', 'Funnel Analysis', 'KPI Design', 'RICE Prioritization']
   },
   {
-    title: 'DASHBOARDS & VISUAL STORYTELLING',
-    icon: <LineChart className="w-8 h-8 text-accent" />,
-    skills: ['Power BI', 'Dashboard Development', 'Presentation Design', 'Business Narratives']
-  },
-  {
-    title: 'METRICS & REPORTING',
+    title: 'ANALYTICS',
     icon: <BarChart3 className="w-8 h-8 text-accent" />,
-    skills: ['KPI Design', 'Operating Metrics', 'Performance Reviews', 'Executive Reporting']
+    skills: ['SQL', 'Python (Pandas)', 'Power BI', 'Amplitude']
   },
   {
-    title: 'CORE TOOLKIT',
-    icon: <Database className="w-8 h-8 text-accent" />,
-    skills: ['Microsoft Excel', 'Python (Pandas)', 'SQL', 'Power BI']
+    title: 'AI & PROTOTYPING',
+    icon: <Sparkles className="w-8 h-8 text-accent" />,
+    skills: ['LLM APIs', 'Generative AI', 'Lovable', 'Claude Code']
+  },
+  {
+    title: 'EXECUTION',
+    icon: <Workflow className="w-8 h-8 text-accent" />,
+    skills: ['Agile & Scrum', 'UAT', 'JIRA', 'Notion']
   }
 ];
 
@@ -48,7 +54,7 @@ export default function Skills() {
         </div>
 
         <p className="max-w-3xl text-white/60 text-sm md:text-base leading-relaxed mb-12 md:mb-16">
-          Skill stack tailored for Product, Strategy, and Founder&apos;s Office roles: from strategic market analysis and executive communication to hands-on data modeling and dashboard-led decision systems.
+          A product toolkit spanning discovery to delivery: from user research, PRDs, and prioritization to experimentation, analytics, and AI-assisted prototyping that turns ideas into shippable, measurable product decisions.
         </p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
@@ -80,6 +86,21 @@ export default function Skills() {
                 ))}
               </ul>
             </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Infinite tool marquee */}
+      <div className="relative mt-20 md:mt-28 w-full overflow-hidden border-y border-white/5 py-6 [mask-image:linear-gradient(to_right,transparent,#000_12%,#000_88%,transparent)]">
+        <div className="flex w-max animate-marquee gap-12 pr-12">
+          {[...marqueeItems, ...marqueeItems].map((item, i) => (
+            <span
+              key={`${item}-${i}`}
+              className="flex items-center gap-12 whitespace-nowrap font-display italic text-2xl md:text-4xl font-medium text-white/25"
+            >
+              {item}
+              <span className="h-1.5 w-1.5 rounded-full bg-accent/50" />
+            </span>
           ))}
         </div>
       </div>

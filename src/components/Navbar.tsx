@@ -75,9 +75,9 @@ export default function Navbar() {
             <ul className="flex items-center gap-10">
               {links.map((link) => (
                 <li key={link.name}>
-                  <a 
-                    href={link.href} 
-                    className="text-white/80 hover:text-accent text-[11px] uppercase tracking-[0.3em] font-bold transition-all duration-300"
+                  <a
+                    href={link.href}
+                    className="link-underline text-white/80 hover:text-accent text-[11px] uppercase tracking-[0.3em] font-bold transition-colors duration-300"
                   >
                     {link.name}
                   </a>
@@ -85,11 +85,11 @@ export default function Navbar() {
               ))}
             </ul>
             <div className="flex items-center gap-4 ml-4">
-              <a 
-                href="#projects" 
-                className="px-6 py-3 bg-accent text-black text-[11px] uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white transition-all hover:scale-105 duration-300 shadow-[0_0_20px_var(--accent-muted)]"
+              <a
+                href="#projects"
+                className="btn-shine px-6 py-3 bg-accent text-black text-[11px] uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white transition-all hover:scale-105 duration-300 shadow-[0_0_20px_var(--accent-muted)]"
               >
-                View Work
+                <span className="relative z-[2]">View Work</span>
               </a>
             </div>
           </nav>
@@ -141,8 +141,8 @@ export default function Navbar() {
                 transition={{ delay: 0.6 }}
                 className="mt-12 flex flex-col items-center gap-4 w-full"
               >
-                <a 
-                  href="#projects" 
+                <a
+                  href="#projects"
                   onClick={closeMenu}
                   className="w-full py-4 text-center bg-accent text-black text-xs uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white transition-all shadow-[0_0_30px_var(--accent-muted)]"
                 >

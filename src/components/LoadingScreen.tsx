@@ -40,10 +40,35 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   const hasPlayedAudioRef = useRef(false);
   const loadingStartedAtRef = useRef(0);
   const lastAudioSyncRef = useRef(0);
+  const timersRef = useRef<{
+    interval?: ReturnType<typeof setInterval>;
+    hold?: ReturnType<typeof setTimeout>;
+    exit?: ReturnType<typeof setTimeout>;
+    hide?: ReturnType<typeof setTimeout>;
+  }>({});
 
   const handleComplete = useCallback(() => {
     onComplete();
   }, [onComplete]);
+
+  const handleSkip = useCallback(() => {
+    const timers = timersRef.current;
+    if (timers.interval) clearInterval(timers.interval);
+    if (timers.hold) clearTimeout(timers.hold);
+    if (timers.exit) clearTimeout(timers.exit);
+    if (timers.hide) clearTimeout(timers.hide);
+
+    if (soundtrackRef.current) {
+      soundtrackRef.current.pause();
+    }
+
+    setProgress(1);
+    setPhase('exiting');
+    timersRef.current.hide = setTimeout(() => {
+      setIsVisible(false);
+      handleComplete();
+    }, 700);
+  }, [handleComplete]);
 
   const getElapsedSeconds = useCallback(() => {
     if (!loadingStartedAtRef.current) {
@@ -97,6 +122,34 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
   }, [syncSoundtrackToTimeline]);
 
   useEffect(() => {
+    // Play the full cinematic on a fresh visit, but don't make returning
+    // (in-session) or reduced-motion visitors sit through it again.
+    let prefersReduced = false;
+    try {
+      prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      prefersReduced = false;
+    }
+
+    let alreadySeen = false;
+    try {
+      alreadySeen = sessionStorage.getItem('rr-intro-seen') === '1';
+    } catch {
+      alreadySeen = false;
+    }
+
+    if (prefersReduced || alreadySeen) {
+      setIsVisible(false);
+      handleComplete();
+      return;
+    }
+
+    try {
+      sessionStorage.setItem('rr-intro-seen', '1');
+    } catch {
+      /* storage unavailable — still play the intro, just don't persist */
+    }
+
     loadingStartedAtRef.current = Date.now();
     void playCinematicStartup();
 
@@ -136,6 +189,8 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       setIsVisible(false);
       handleComplete();
     }, LOADING_DURATION);
+
+    timersRef.current = { interval, hold: holdTimer, exit: exitTimer, hide: hideTimer };
 
     return () => {
       clearInterval(interval);
@@ -535,7 +590,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                 : { duration: 0.8, delay: phase === 'exiting' ? 0 : 1.9 }
             }
           >
-            Product &amp; Data Analyst
+            Product Manager
           </motion.p>
 
           <motion.p
@@ -598,6 +653,30 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.3 }}
           />
+
+          {/* Skip intro — respects the cinematic for those who want it, frees those who don't */}
+          <AnimatePresence>
+            {phase !== 'exiting' && (
+              <motion.button
+                type="button"
+                onClick={handleSkip}
+                className="group absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1.25rem,env(safe-area-inset-right))] z-30 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] transition-colors duration-300"
+                style={{
+                  borderColor: 'rgba(255,255,255,0.12)',
+                  color: 'rgba(255,255,255,0.55)',
+                  background: 'rgba(5,12,16,0.45)',
+                  backdropFilter: 'blur(6px)',
+                }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.5, delay: 1.6, ease: [0.22, 1, 0.36, 1] } }}
+                exit={{ opacity: 0, y: 8, transition: { duration: 0.25 } }}
+                whileHover={{ color: '#C6FF00', borderColor: 'rgba(198,255,0,0.45)' }}
+              >
+                Skip Intro
+                <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
+              </motion.button>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>

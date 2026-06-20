@@ -17,18 +17,27 @@ export default function About() {
           </div>
 
           <h2 className="text-3xl md:text-6xl leading-tight font-display tracking-tight mb-12 md:mb-16 text-white">
-            Turning product questions into <span className="text-accent">measurable</span> outcomes.
+            Turning user research into <span className="text-accent">measurable</span> product outcomes.
             <br className="hidden md:block" />
-            Combining <span className="text-white/60">product thinking</span> with deep analytical rigor.
+            Pairing <span className="text-white/60">product thinking</span> with analytical rigor.
           </h2>
-          
+
           <div className="font-body text-base md:text-lg text-white/80 tracking-wide leading-relaxed max-w-3xl mx-auto">
             <p className="mb-6">
-              Rishabh Rai operates at the intersection of product strategy and data analytics. He translates ambiguous product questions into structured experiments, actionable metrics, and growth frameworks &mdash; enabling teams to ship with confidence and iterate with clarity.
+              Rishabh Rai is a Product Management candidate at KIIT University, with experience across product discovery, user research, and analytics-led decision making through internships and AI product projects. He builds and validates AI-enabled workflows using LLM APIs and rapid prototyping tools.
             </p>
             <p>
-              His portfolio spans end-to-end product analytics &mdash; from defining KPIs and building dashboards to running A/B test analyses, user funnel diagnostics, and executive-level reporting that shapes roadmap priorities.
+              From PRDs and RICE-prioritized roadmaps to A/B test plans, funnel analysis, and dashboards, he ships product decisions designed for measurable user and business impact.
             </p>
+          </div>
+
+          <div className="mt-12 md:mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm">
+            <span className="text-white/40 uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold">Education</span>
+            <div className="hidden sm:block w-px h-8 bg-white/10" />
+            <div className="text-center sm:text-left">
+              <p className="text-white/90 font-medium">B.Tech, Electronics &amp; Computer Science</p>
+              <p className="text-white/50 text-xs md:text-sm">Kalinga Institute of Industrial Technology (KIIT University) &middot; 2023&ndash;2027</p>
+            </div>
           </div>
         </motion.div>
       </div>
