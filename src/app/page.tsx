@@ -14,29 +14,26 @@ import Contact from '@/components/Contact';
 import ScrollyCanvas from '@/components/ScrollyCanvas';
 import AmbientFx from '@/components/AmbientFx';
 import Chatbot from '@/components/Chatbot';
-import Cursor from '@/components/Cursor';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   return (
     <>
-      <LoadingScreen onComplete={() => setIsLoading(false)} />
-      <Cursor />
+      {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
       <Chatbot isLoading={isLoading} />
       
       <main
-        className="relative min-h-screen bg-background w-full overflow-x-hidden selection:bg-accent selection:text-black"
+        className="relative min-h-screen bg-background w-full overflow-x-hidden selection:bg-accent selection:text-black transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
-          opacity: isLoading ? 0 : 1,
-          transition: 'opacity 0.8s ease-in-out',
+          opacity: isLoading ? 0.2 : 1,
+          transform: isLoading ? 'scale(0.98)' : 'scale(1)',
           pointerEvents: isLoading ? 'none' : 'auto',
         }}
       >
-        {/* Mounted during loading too, so the 74→3 MB frame set preloads
-            behind the intro and the background is ready the instant it ends. */}
+        {/* Scrolly sequence renders smoothly in background */}
         <ScrollyCanvas />
-        {!isLoading && <AmbientFx />}
+        <AmbientFx />
         
         <div className="relative z-10">
           <Navbar />

@@ -110,7 +110,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} ${playfair.variable} antialiased bg-background text-white selection:bg-accent selection:text-black`}>
+      <body className={`${inter.variable} ${playfair.variable} antialiased bg-black text-[#F5F5F7] selection:bg-apple-blue selection:text-white font-sans`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
