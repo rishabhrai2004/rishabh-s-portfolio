@@ -5,7 +5,6 @@ import { SITE, SITE_URL } from '@/lib/site';
 
 const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-inter',
   display: 'swap',
 });
 const playfair = Playfair_Display({
@@ -110,7 +109,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} ${playfair.variable} antialiased bg-black text-[#F5F5F7] selection:bg-apple-blue selection:text-white font-sans`}>
+      <body className={`${inter.className} ${playfair.variable} antialiased bg-black text-[#F5F5F7] selection:bg-apple-blue selection:text-white`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
