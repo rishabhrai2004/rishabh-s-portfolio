@@ -10,6 +10,7 @@ type ChatMessage = {
   id: number;
   role: Role;
   text: string;
+  isError?: boolean;
 };
 
 interface ChatbotProps {
@@ -104,33 +105,47 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
     fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({
+        message: text,
+        history: messages
+          .filter((message) => !message.isError)
+          .slice(-10)
+          .map((message) => ({
+            role: message.role === 'user' ? 'user' : 'assistant',
+            content: message.text,
+          })),
+      }),
     })
       .then(async (res) => {
-        const data = await res.json();
+        const data: { error?: string; reply?: string } = await res.json();
         if (!res.ok) {
           throw new Error(data?.error || 'Chat request failed');
         }
-        return data;
+        if (typeof data.reply !== 'string' || !data.reply.trim()) {
+          throw new Error('Live AI returned an empty response. Please try again.');
+        }
+        return { ...data, reply: data.reply.trim() };
       })
       .then((data) => {
         const botMessage: ChatMessage = {
           id: Date.now() + 1,
           role: 'bot',
-          text:
-            data.reply ||
-            'I could not retrieve an AI reply right now, but I can answer about projects, skills, experience, certifications, and contact details.',
+          text: data.reply.trim(),
         };
         setMessages((prev) => [...prev, botMessage]);
         setIsTyping(false);
       })
       .catch((error) => {
         console.error('Chat error:', error);
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Could not connect to live AI. Please try again.';
         const errorMessage: ChatMessage = {
           id: Date.now() + 1,
           role: 'bot',
-          text:
-            'Live AI is temporarily offline. Rishabh is open to APM roles—ask about his projects, skills, experience, or contact information.',
+          text: `Live AI unavailable: ${message}`,
+          isError: true,
         };
         setMessages((prev) => [...prev, errorMessage]);
         setIsTyping(false);
@@ -220,10 +235,13 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
                       >
                         <div
                           className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-[13px] leading-relaxed ${
-                            m.role === 'user'
+                            m.isError
+                              ? 'bg-red-950/70 text-red-100 border border-red-400/20 rounded-bl-sm'
+                              : m.role === 'user'
                               ? 'bg-apple-blue text-white rounded-br-sm'
                               : 'bg-[#242426] text-neutral-100 border border-white/[0.08] rounded-bl-sm'
                           }`}
+                          role={m.isError ? 'alert' : undefined}
                         >
                           {m.text}
                         </div>
