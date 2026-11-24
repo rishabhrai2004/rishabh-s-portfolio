@@ -1,69 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const NVIDIA_API_URL = process.env.NVIDIA_API_URL || 'https://integrate.api.nvidia.com/v1/chat/completions';
-const DEFAULT_MODELS = 'meta/llama-3.3-70b-instruct,meta/llama-3.1-70b-instruct,mistralai/mixtral-8x7b-instruct-v0.1,meta/llama-3.1-8b-instruct';
+const DEFAULT_MODEL = 'nvidia/nemotron-3.5-bolt-e4b';
+const PROVIDER_TIMEOUT_MS = 2800;
+const MAX_MESSAGE_LENGTH = 1000;
+const RESPONSE_CACHE_TTL_MS = 10 * 60 * 1000;
+const MAX_CACHED_RESPONSES = 100;
+const GENERIC_FALLBACK_REPLY =
+  'I can help with projects, skills, experience, education, certifications, and contact details. Try asking: summarize the case studies, the product toolkit, or how to get in touch.';
 
-function getCandidateModels() {
+export const maxDuration = 4;
+
+const responseCache = new Map<string, { reply: string; expiresAt: number }>();
+
+function getModel() {
   const configuredModels = (process.env.NVIDIA_MODELS || '')
     .split(',')
     .map((model) => model.trim())
     .filter(Boolean);
 
   const preferredModel = (process.env.NVIDIA_MODEL || '').trim();
-
-  const defaultModels = DEFAULT_MODELS.split(',')
-    .map((model) => model.trim())
-    .filter(Boolean);
-
-  return Array.from(new Set([...configuredModels, preferredModel, ...defaultModels].filter(Boolean)));
+  return preferredModel || configuredModels[0] || DEFAULT_MODEL;
 }
 
 const systemPrompt = `You are Rishabh Rai's portfolio assistant. You represent a dedicated Product Manager focusing on Product Management, Product Sense, and Go-To-Market (GTM) Strategy. Here is the context:
 
-**About Rishabh:**
-Rishabh Rai is a product management candidate pursuing a B.Tech in Electronics and Computer Science (2023–2027) at Kalinga Institute of Industrial Technology (KIIT University). He works on payment categorisation at Fineye and KYC/KYB verification at BeFiSc, with experience in product discovery, user research, GTM, and analytics-led decision making. He builds AI-enabled workflows using LLM APIs.
+Answer in a friendly, direct voice. Keep replies to 1-3 short sentences, usually under 70 words. Answer the question first. Use only these facts and do not invent details. If a fact is missing, say so and offer the closest relevant information.
 
-**Work Experience:**
-1. Fineye | Product Intern (October 2026 – Present)
-   Financial Data Intelligence Platform – Payment Categorisation & Bank Statement Analysis
-   - Analysed bank narration patterns across 5 crore payment narrations from 67 banks and mapped transaction categories and subcategories, improving transaction categorisation by 28%.
-   - Conducted product benchmarking, competitor analysis, and gap analysis to identify classification mismatches and improvement opportunities in banking data processing and financial insights.
-   - Collaborated with Engineering and QA on categorisation logic, validation, testing, and refinement of transaction classification.
+ABOUT: Rishabh Rai is pursuing a B.Tech in Electronics and Computer Science at KIIT University (2023–2027). Product experience spans fintech, payment categorisation, KYC/KYB, discovery, research, analytics, GTM, and AI-enabled workflows.
 
-2. BeFiSc | Product Intern (August 2026 – Present, Noida, India)
-   Fintech & RegTech, KYC/KYB Verification
-   - Defined business logic and product requirements for a multi-provider API fallback system, collaborating with engineering to route requests during low-confidence scenarios, improving data accuracy by 23%.
-   - Identified vendor cost inefficiencies and prioritised an API optimisation initiative, partnering with engineering to implement caching strategies that reduced API costs by 22% without impacting data freshness.
-   - Led the 0-to-1 product lifecycle, including PRD development, for a merchant risk and KYB verification report, consolidating GST, credit health, and cross-entity ownership checks into a single automated underwriting flow.
+EXPERIENCE:
+- Fineye, Product Intern (Oct 2026–present): analysed 5 crore payment narrations across 67 banks; improved categorisation by 28%; worked with Engineering and QA on classification logic and validation.
+- BeFiSc, Product Intern (Aug 2026–present): specified multi-provider API fallback, improving data accuracy by 23%; caching reduced API costs by 22%; wrote PRDs for a merchant-risk/KYB report combining GST, credit health, and ownership checks.
+- MKTea, Data & Product Intern (May–Jun 2025): analysed 20,000+ records; recommendations improved operational efficiency by 30%; built Power BI dashboards.
+- IOCL, Data Analytics Intern (Jun–Jul 2025): SQL/Python and Power BI reporting; improved accuracy by 25% and saved 15 hours weekly.
+- KIIT E-Cell CMO: growth and A/B tests for a 10,000+ student ecosystem; 40% rise in event registrations. KIIT International MUN Deputy Director: operations for 1,500+ delegates.
 
-3. MKTea | Data & Product Intern (May 2025 – June 2025, Doomdooma, Assam, India – B2B Tea FMCG)
-   - Analysed 20,000+ operational entries to identify process bottlenecks, informed product requirement recommendations that drove 30% operational efficiency gains, and built Power BI KPI/OKR dashboards for leadership across 4 departments.
+PROJECTS:
+- Swiggy vs Eternal: competitive teardown and Browse-Repeat framework; recommended surfacing District ticketing in Zomato using RICE, with success metrics and A/B test plan.
+- MakeMyTrip AI Travel Feature Suite: four checkout features (eSIM, AI itinerary, crew tracking, SafeMode); eSIM model projects ₹816 Cr GMV at 15% attach rate; safety features target repeat bookings rising from 31% to 44%.
 
-4. Indian Oil Corporation Limited (IOCL) | Data Analytics Intern (June 2025 – July 2025, Digboi Refinery, Assam, India)
-   - Queried and cleaned operational datasets with SQL and Python (Pandas) and built Power BI KPI dashboards for 3 internal reporting tools, improving reporting accuracy by 25% and reducing manual effort by 15 hours weekly.
-
-**Leadership & Extracurricular:**
-- KIIT Entrepreneurship Cell | Chief Marketing Officer (2024 – Present): Lead growth strategy and A/B tests for a 10,000+ student ecosystem, mentoring 25+ startups and driving a 40% rise in event registrations.
-- KIIT International MUN | Deputy Director – Operations & Strategy (2024 – 2025): Directed operations for one of Asia's largest MUN conferences: 200+ volunteers, 8 teams, 1,500+ delegates.
-
-**Projects:**
-1. Swiggy vs Eternal – Product Strategy Teardown:
-   Conducted competitive analysis and user research on Swiggy and Eternal’s app architecture, building the Browse-Repeat framework to map each vertical to the right surface by usage frequency and funnel behaviour. Recommended threading District ticketing into Zomato’s 100M+ user base using RICE prioritisation, projecting District user growth at low CAC by removing the install wall at peak intent, with success metrics and an A/B testing plan.
-2. MakeMyTrip – AI Travel Feature Suite:
-   Wrote PRD specs, user flows, wireframes, and a phased V1/V2 roadmap for a 4-feature suite inside MMT’s checkout flow: eSIM Activation, AI Itinerary Engine, Crew Live Tracking, and SafeMode for Women. Modelled revenue growth from existing customers at zero acquisition cost: eSIM cross-sell projecting Rs 816 Cr GMV at a 15% attach rate, and women’s safety features lifting repeat bookings from 31% to 44%.
-
-**Technical Skills:**
-- Product: Product Lifecycle Management, Stakeholder Management, PRD Development, User Stories, Product Roadmap, User Research, Feature Prioritization, A/B Testing, Funnel Analysis, KPI Design, GTM Strategy, Agile, Scrum, UAT, API Integration, Customer Retention, CAC Optimisation, Revenue Growth
-- Analytics & AI: Product Analytics, SQL, Python (Pandas), Power BI, Amplitude, Competitive Analysis, Gap Analysis, Payment Categorisation, JIRA, Notion, LLM APIs, Generative AI, Lovable, Claude Code
-
-**Certifications:**
-- IBM AI Product Manager Certificate – IBM
-- Google Introduction to Generative AI – Google Cloud
-- Cisco Data Science Certificate – Cisco Networking Academy
-- Data Analyst Bootcamp – Udemy
-
-**Contact:**
-Email: rishabhraittt@gmail.com | LinkedIn: https://www.linkedin.com/in/rishabh-rai-961937280/`;
+SKILLS: PRDs, roadmaps, user research, RICE, A/B testing, funnel/KPI analysis, GTM, SQL, Python/Pandas, Power BI, Amplitude, JIRA, Notion, LLM APIs.
+CERTIFICATIONS: IBM AI Product Manager, Google Cloud Generative AI, Cisco Data Science, Udemy Data Analyst Bootcamp.
+CONTACT: rishabhraittt@gmail.com; https://www.linkedin.com/in/rishabh-rai-961937280/.`;
 
 function hasAny(text: string, words: string[]) {
   return words.some((word) => text.includes(word));
@@ -72,16 +51,44 @@ function hasAny(text: string, words: string[]) {
 function localFallbackReply(input: string) {
   const text = input.toLowerCase();
 
-  if (hasAny(text, ['project', 'portfolio', 'work', 'case stud'])) {
-    return 'Case studies: Swiggy vs Eternal (product strategy teardown with RICE-prioritized roadmap and A/B test plan), MakeMyTrip AI Travel Feature Suite (PRD specs + market-sizing projecting ₹816 Cr GMV for eSIM), and Craft Tea (product vision, GTM, and pricing architecture, prototyped with Claude Code). Plus product & AI builds: AI Startup Idea Validator, Retail Product Analytics (Azure SQL + Power BI), and Agri-Yield Prediction Hub (Snowflake + AWS S3). Ask about any one and I can break down the problem, approach, and outcomes.';
+  if (hasAny(text, ['befisc', 'kyc', 'kyb']) && hasAny(text, ['iocl', 'indian oil'])) {
+    return 'At BeFiSc, API fallback improved verification accuracy by 23% and caching cut API costs by 22%. At IOCL, SQL/Python analysis and Power BI reporting improved accuracy by 25% and saved 15 hours of manual work each week.';
   }
 
-  if (hasAny(text, ['skill', 'tools', 'stack', 'technology'])) {
-    return 'Product: roadmaps, PRDs, user research, RICE prioritization, A/B testing, funnel analysis, KPI design, GTM. Analytics & AI: SQL, Python (Pandas), Power BI, Amplitude, JIRA, Notion, LLM APIs, Generative AI, plus rapid prototyping with Lovable and Claude Code.';
+  if (hasAny(text, ['toolkit', 'skill', 'tools', 'stack', 'technology', 'gtm'])) {
+    return 'Rishabh’s toolkit combines product discovery, user research, PRDs, roadmaps, RICE prioritization, A/B testing, funnel analysis, KPI design, and GTM. For analytics and prototyping, he uses SQL, Python, Power BI, Amplitude, JIRA, Notion, and LLM APIs.';
+  }
+
+  if (hasAny(text, ['leadership', 'e-cell', 'mun', 'extracurricular'])) {
+    return 'Rishabh is CMO at KIIT Entrepreneurship Cell, where growth strategy and A/B tests helped increase event registrations by 40% across a 10,000+ student ecosystem. He also served as Deputy Director for KIIT International MUN operations, supporting 1,500+ delegates.';
+  }
+
+  if (hasAny(text, ['fineye', 'payment narration', 'payment categor', 'bank narration'])) {
+    return 'At Fineye, Rishabh analysed 5 crore payment narrations from 67 banks and helped improve transaction categorisation by 28%, working with Engineering and QA on classification logic and validation.';
+  }
+
+  if (hasAny(text, ['befisc', 'kyc', 'kyb', 'api fallback', 'api cost', 'caching'])) {
+    return 'At BeFiSc, Rishabh worked on KYC/KYB products. A multi-provider API fallback improved data accuracy by 23%, while caching reduced API costs by 22%; he also wrote the PRD for a merchant-risk verification report.';
+  }
+
+  if (hasAny(text, ['swiggy', 'eternal', 'browse-repeat', 'district ticket'])) {
+    return 'The Swiggy vs Eternal teardown introduced a Browse-Repeat framework to map product surfaces to user intent. It recommended bringing District ticketing into Zomato, prioritized with RICE and supported by success metrics and an A/B test plan.';
+  }
+
+  if (hasAny(text, ['makemytrip', 'make my trip', 'mmt', 'travel feature', '816'])) {
+    return 'The MakeMyTrip case study proposes four checkout features: eSIM activation, an AI itinerary, crew tracking, and SafeMode for Women. The eSIM model projects ₹816 Cr GMV at a 15% attach rate; the safety feature targets repeat bookings rising from 31% to 44%.';
+  }
+
+  if (hasAny(text, ['strategy', 'priorit', 'approach', 'impact', 'outcome'])) {
+    return 'Rishabh starts with user needs and funnel evidence, then defines measurable outcomes, prioritizes with RICE, and validates through experiments. Examples include a 28% lift in payment categorisation at Fineye and 23% higher verification accuracy at BeFiSc.';
+  }
+
+  if (hasAny(text, ['project', 'portfolio', 'work', 'case stud'])) {
+    return 'Featured case studies are the Swiggy vs Eternal product teardown and MakeMyTrip AI Travel Feature Suite. The first uses a Browse-Repeat framework and RICE prioritization; the second defines four checkout features and models eSIM revenue at ₹816 Cr GMV. Ask about either for details.';
   }
 
   if (hasAny(text, ['experience', 'intern', 'role', 'background'])) {
-    return 'Experience: Indian Oil Corporation (Data Analytics Intern — 25% better reporting accuracy, 15 hrs/week saved), MKTea (Data & Product Intern across 20,000+ entries, 30% efficiency gains), KIIT E-Cell (Chief Marketing Officer for a 10,000+ student ecosystem, 40% rise in registrations), and KIIT International MUN (Deputy Director, Operations & Strategy for 1,500+ delegates).';
+    return 'Rishabh has product internships at Fineye and BeFiSc, plus earlier analytics/product roles at MKTea and IOCL. Outcomes include 28% better payment categorisation, 23% higher verification accuracy, 22% lower API costs, and 30% operational efficiency gains.';
   }
 
   if (hasAny(text, ['education', 'college', 'university', 'degree', 'kiit', 'study'])) {
@@ -96,14 +103,26 @@ function localFallbackReply(input: string) {
     return 'Reach Rishabh by email at rishabhraittt@gmail.com or on LinkedIn: https://www.linkedin.com/in/rishabh-rai-961937280/';
   }
 
-  return 'I can help with projects, skills, experience, education, certifications, and contact details. Try asking: summarize the case studies, the product toolkit, or how to get in touch.';
+  return GENERIC_FALLBACK_REPLY;
 }
 
 async function requestNvidiaChat(apiKey: string, userMessage: string) {
-  const models = getCandidateModels();
-  let lastError = 'Unknown provider error';
+  const configuredModel = getModel();
+  const models =
+    configuredModel === DEFAULT_MODEL
+      ? [DEFAULT_MODEL]
+      : [configuredModel, DEFAULT_MODEL];
+  const deadline = Date.now() + PROVIDER_TIMEOUT_MS;
 
   for (const model of models) {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) {
+      return { reply: null, model, error: `Provider timed out after ${PROVIDER_TIMEOUT_MS}ms` };
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), remainingMs);
+
     try {
       const response = await fetch(NVIDIA_API_URL, {
         method: 'POST',
@@ -111,11 +130,12 @@ async function requestNvidiaChat(apiKey: string, userMessage: string) {
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
+        signal: controller.signal,
         body: JSON.stringify({
           model,
-          temperature: 0.3,
-          top_p: 0.9,
-          max_tokens: 700,
+          temperature: 0.2,
+          top_p: 0.85,
+          max_tokens: 220,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userMessage },
@@ -124,9 +144,8 @@ async function requestNvidiaChat(apiKey: string, userMessage: string) {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        lastError = `Model ${model}: ${errorText}`;
-        continue;
+        if (response.status === 404 && model !== DEFAULT_MODEL) continue;
+        return { reply: null, model, error: `Provider returned HTTP ${response.status}` };
       }
 
       const data = await response.json();
@@ -136,56 +155,88 @@ async function requestNvidiaChat(apiKey: string, userMessage: string) {
         return { reply: text.trim(), model, error: null };
       }
 
-      lastError = `Model ${model}: Empty response payload`;
+      return { reply: null, model, error: 'Provider returned an empty response' };
     } catch (error) {
-      lastError = `Model ${model}: ${String(error)}`;
+      const reason =
+        error instanceof Error && error.name === 'AbortError'
+          ? `Provider timed out after ${PROVIDER_TIMEOUT_MS}ms`
+          : 'Provider request failed';
+      return { reply: null, model, error: reason };
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
-  return { reply: null, model: null, error: lastError };
+  return { reply: null, model: DEFAULT_MODEL, error: 'No inference model available' };
 }
 
 export async function POST(request: NextRequest) {
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { message } = body;
-
-    if (!message || typeof message !== 'string') {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
-    }
-
-    const apiKey = process.env.NVIDIA_API_KEY || process.env.GOOGLE_GENERATIVE_AI_KEY;
-
-    if (!apiKey) {
-      return NextResponse.json({
-        reply: localFallbackReply(message),
-        source: 'local-fallback',
-      });
-    }
-
-    const providerResult = await requestNvidiaChat(apiKey, message);
-
-    if (!providerResult.reply) {
-      console.error('NVIDIA provider failed. Falling back locally:', providerResult.error);
-      return NextResponse.json({
-        reply: localFallbackReply(message),
-        source: 'local-fallback',
-      });
-    }
-
-    return NextResponse.json({
-      reply: providerResult.reply,
-      source: 'nvidia',
-      model: providerResult.model,
-    });
-  } catch (error) {
-    console.error('Chat API error:', error);
-    return NextResponse.json({
-      reply: localFallbackReply(''),
-      source: 'local-fallback',
-    });
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Request body must be valid JSON' }, { status: 400 });
   }
+
+  if (
+    !body ||
+    typeof body !== 'object' ||
+    !('message' in body) ||
+    typeof body.message !== 'string' ||
+    !body.message.trim()
+  ) {
+    return NextResponse.json({ error: 'A non-empty message is required' }, { status: 400 });
+  }
+
+  const message = body.message.trim();
+  if (message.length > MAX_MESSAGE_LENGTH) {
+    return NextResponse.json(
+      { error: `Message must be ${MAX_MESSAGE_LENGTH} characters or fewer` },
+      { status: 413 }
+    );
+  }
+
+  const cacheKey = message.toLowerCase().replace(/\s+/g, ' ');
+  const cached = responseCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return NextResponse.json({ reply: cached.reply, source: 'cache' });
+  }
+  if (cached) responseCache.delete(cacheKey);
+
+  const cacheReply = (reply: string) => {
+    if (responseCache.size >= MAX_CACHED_RESPONSES) {
+      const oldestKey = responseCache.keys().next().value;
+      if (oldestKey) responseCache.delete(oldestKey);
+    }
+    responseCache.set(cacheKey, {
+      reply,
+      expiresAt: Date.now() + RESPONSE_CACHE_TTL_MS,
+    });
+  };
+
+  const instantReply = localFallbackReply(message);
+  if (instantReply !== GENERIC_FALLBACK_REPLY) {
+    cacheReply(instantReply);
+    return NextResponse.json({ reply: instantReply, source: 'local-knowledge' });
+  }
+
+  const apiKey = process.env.NVIDIA_API_KEY;
+  if (!apiKey) {
+    cacheReply(instantReply);
+    return NextResponse.json({ reply: instantReply, source: 'local-fallback' });
+  }
+
+  const providerResult = await requestNvidiaChat(apiKey, message);
+  if (!providerResult.reply) {
+    console.error('NVIDIA provider failed. Returning a local answer:', providerResult.error);
+    cacheReply(instantReply);
+    return NextResponse.json({ reply: instantReply, source: 'local-fallback' });
+  }
+
+  cacheReply(providerResult.reply);
+  return NextResponse.json({
+    reply: providerResult.reply,
+    source: 'nvidia',
+    model: providerResult.model,
+  });
 }
