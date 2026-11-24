@@ -39,20 +39,21 @@ export default function Hero() {
 
   return (
     <section
+      id="hero"
       ref={containerRef}
       className="relative min-h-[100svh] w-full bg-transparent overflow-hidden flex flex-col justify-between pt-24 pb-12 sm:pb-16"
     >
       {/* Abstract Background Elements */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[16%] left-[20%] w-[52vw] h-[52vw] bg-accent/10 blur-[190px] rounded-full" />
-        <div className="absolute bottom-[16%] right-[14%] w-[34vw] h-[34vw] bg-white/10 blur-[150px] rounded-full" />
+        <div className="absolute top-[16%] left-[20%] w-[52vw] h-[52vw] bg-accent/10 blur-[90px] md:blur-[190px] rounded-full" />
+        <div className="absolute bottom-[16%] right-[14%] w-[34vw] h-[34vw] bg-white/10 blur-[75px] md:blur-[150px] rounded-full" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:44px_44px] md:bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_68%_70%_at_50%_100%,#000_28%,transparent_100%)] opacity-20" />
       </div>
 
       {/* Massive Background Typography */}
       <motion.div
         style={{ y: y1, opacity }}
-        className="absolute inset-x-0 bottom-[14vh] sm:bottom-[16vh] md:bottom-[20vh] flex items-center justify-center text-center z-10 pointer-events-none select-none w-full"
+        className="absolute inset-x-0 bottom-[14vh] hidden items-center justify-center text-center z-10 pointer-events-none select-none w-full sm:flex sm:bottom-[16vh] md:bottom-[20vh]"
       >
         <h1
           className="font-display text-white/10 sm:text-white/12 md:text-white/10 text-[clamp(40px,10vw,160px)] leading-none text-center font-semibold tracking-[-0.03em] w-full"
@@ -106,7 +107,7 @@ export default function Hero() {
 
           {/* User's Exact Summary */}
           <p className="text-sm sm:text-base text-white/80 max-w-xl leading-relaxed mb-8 tracking-[0.01em]">
-            Product enthusiast working on payment categorisation at <span className="text-accent font-medium">Fineye</span> and KYC/KYB verification at <span className="text-white font-semibold">BeFiSc</span>, with experience in product discovery, user research, and analytics-led decision making. Built AI-enabled workflows using LLM APIs.
+            At <span className="text-accent font-medium">Fineye</span>, I work on payment categorisation. At <span className="text-white font-semibold">BeFiSc</span>, I help shape KYC/KYB verification. I bring product discovery, user research, analytics, and AI-enabled workflows together to solve practical problems.
           </p>
 
           {/* Action Buttons */}
@@ -131,13 +132,13 @@ export default function Hero() {
 
       {/* Glassmorphic Metrics Ribbon That Pops on Hover */}
       <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full z-30 mt-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div id="hero-metrics" className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {heroMetrics.map((metric) => (
             <div
               key={metric.label}
-              className="glassmorph-box p-4 sm:p-5 flex flex-col justify-between group cursor-pointer"
+              className="glassmorph-box bg-[#070a0e]/90 p-3 sm:p-5 flex flex-col justify-between group cursor-pointer"
             >
-              <span className="font-display text-2xl sm:text-3xl font-bold leading-none text-white group-hover:text-accent transition-colors">
+              <span className="font-display text-[clamp(1.1rem,6vw,1.5rem)] sm:text-3xl font-bold leading-none text-white group-hover:text-accent transition-colors">
                 {metric.num}
               </span>
               <div className="mt-2">

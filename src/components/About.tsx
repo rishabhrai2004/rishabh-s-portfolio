@@ -46,7 +46,7 @@ export default function About() {
 
           <div className="font-body text-base md:text-lg text-white/80 tracking-wide leading-relaxed max-w-3xl mx-auto mb-16">
             <p className="mb-4">
-              Product enthusiast working on payment categorisation at <span className="text-white font-medium">Fineye</span> and KYC/KYB verification at <span className="text-white font-medium">BeFiSc</span>, with experience in product discovery, user research, and analytics-led decision making. Built AI-enabled workflows using LLM APIs.
+              Across fintech, I turn customer and data insights into clear product requirements and resilient workflows. My current work spans payment categorisation at <span className="text-white font-medium">Fineye</span> and KYC/KYB verification at <span className="text-white font-medium">BeFiSc</span>.
             </p>
             <p className="text-white/60 text-sm md:text-base">
               From PRDs, API fallback systems, and RICE-prioritized roadmaps to CAC optimization and GTM attach-rate modeling, every decision is tied directly to user adoption and sustainable revenue.
@@ -63,16 +63,16 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: idx * 0.1 }}
-              className="glassmorph-box p-8 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
+              className="glassmorph-box p-6 sm:p-8 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-bl-full pointer-events-none group-hover:bg-accent/10 transition-colors" />
 
               <div>
-                <div className="flex items-center justify-between mb-6">
+                <div className="mb-6 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <span className="text-accent font-display font-black text-2xl">
                     {pillar.num}
                   </span>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
+                  <span className="text-[9px] leading-relaxed uppercase tracking-[0.12em] text-white/50 font-bold sm:text-[10px] sm:tracking-[0.2em]">
                     {pillar.label}
                   </span>
                 </div>
@@ -86,10 +86,6 @@ export default function About() {
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-accent/80 font-semibold uppercase tracking-wider">
-                <span>Verified PM Execution</span>
-                <span>&rarr;</span>
-              </div>
             </motion.div>
           ))}
         </div>

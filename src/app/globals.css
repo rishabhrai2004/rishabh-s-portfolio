@@ -72,15 +72,41 @@
                 border-color 0.35s ease;
   }
 
-  .glass-card:hover,
-  .apple-card:hover,
-  .glassmorph-box:hover {
-    transform: translateY(-6px) scale(1.018);
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.24);
-    box-shadow: 0 24px 55px -12px rgba(0, 0, 0, 0.75),
-                0 0 35px -5px rgba(41, 151, 255, 0.18),
-                inset 0 1px 2px 0 rgba(255, 255, 255, 0.25);
+  @media (hover: hover) and (pointer: fine) {
+    .glass-card:hover,
+    .apple-card:hover,
+    .glassmorph-box:hover {
+      transform: translateY(-6px) scale(1.018);
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.24);
+      box-shadow: 0 24px 55px -12px rgba(0, 0, 0, 0.75),
+                  0 0 35px -5px rgba(41, 151, 255, 0.18),
+                  inset 0 1px 2px 0 rgba(255, 255, 255, 0.25);
+    }
+  }
+
+  @media (max-width: 640px) {
+    body {
+      background-attachment: scroll;
+    }
+
+    .glass-card,
+    .apple-card,
+    .glassmorph-box {
+      backdrop-filter: blur(12px) saturate(150%);
+      -webkit-backdrop-filter: blur(12px) saturate(150%);
+      box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.55),
+                  inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  @media (hover: none) {
+    .glass-card:active,
+    .apple-card:active,
+    .glassmorph-box:active {
+      transform: scale(0.99);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
   }
 
   .apple-bento-hero {

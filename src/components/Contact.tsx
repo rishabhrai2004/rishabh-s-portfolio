@@ -7,7 +7,7 @@ export default function Contact() {
   return (
     <section id="contact" className="py-20 md:py-32 bg-transparent text-white overflow-hidden relative border-t border-white/5 flex flex-col justify-center min-h-[75vh]">
       <div className="absolute inset-0 w-full h-full bg-accent mix-blend-overlay opacity-5 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-accent/5 blur-[250px] rounded-full pointer-events-none mix-blend-screen" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-accent/5 blur-[100px] md:blur-[250px] rounded-full pointer-events-none mix-blend-screen" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10 flex flex-col items-center justify-center text-center w-full">
         <motion.div

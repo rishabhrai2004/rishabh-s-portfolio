@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, Activity, Sparkles } from 'lucide-react';
+import { Terminal, Activity, Workflow } from 'lucide-react';
 
 const NAME_FIRST = 'RISHABH';
 const NAME_LAST = 'RAI';
@@ -31,20 +31,20 @@ const TELEMETRY_STREAM = [
   'ALL PRODUCT TELEMETRY SYNCHRONIZED // PRODUCT_OS READY FOR LAUNCH',
 ];
 
-const ANIME_MASCOT_DIALOGS = [
-  '✦ PRODUCT SENSE: OVER 9000! ✦',
-  '⚡ 0-TO-1 SPECIAL MOVE CHARGING... ⚡',
-  '★ BROWSE-REPEAT FRAMEWORK UNLOCKED! ★',
-  '✦ PRD LEVEL: S-TIER ★★★★★ ✦',
-  '⚡ POWERING UP 50M EMBEDDINGS! ⚡',
-  '★ CRITICAL HIT: +28% RETENTION! ★',
+const PRODUCT_SIGNALS = [
+  'CUSTOMER SIGNALS MAPPED',
+  'PRD SCOPE LOCKED',
+  'GTM MODEL READY',
+  'RETENTION LIFT +28%',
+  'API COST DOWN 22%',
+  '50M+ TRANSACTIONS ANALYZED',
 ];
 
 const MILESTONES = [
-  { label: 'DISCOVERY', threshold: 25 },
-  { label: 'PRD SPEC', threshold: 50 },
-  { label: 'GTM ENGINE', threshold: 75 },
-  { label: 'LAUNCH READY', threshold: 100 },
+  { label: 'DISCOVERY', shortLabel: 'DISCOVERY', threshold: 25 },
+  { label: 'PRD SPEC', shortLabel: 'PRD SPEC', threshold: 50 },
+  { label: 'GTM ENGINE', shortLabel: 'GTM', threshold: 75 },
+  { label: 'LAUNCH READY', shortLabel: 'LAUNCH', threshold: 100 },
 ];
 
 const TOP_TICKER_TEXT =
@@ -53,9 +53,9 @@ const TOP_TICKER_TEXT =
 const BOTTOM_TICKER_TEXT =
   'PRODUCT SENSE /// METRICS-DRIVEN ROADMAP /// RICE PRIORITIZATION /// USER RESEARCH /// RETENTION COHORTS /// POWER BI /// SQL & PYTHON /// A/B EXPERIMENTATION /// KIIT ECS 2027 /// SYSTEM READY /// PRODUCT_OS ONLINE /// ';
 
-const DURATION_MS = 8800; // 8.8 seconds total duration
+const DURATION_MS = 5200;
 
-interface AnimeParticle {
+interface ProductParticle {
   radius: number;
   angle: number;
   angularSpeed: number;
@@ -65,34 +65,34 @@ interface AnimeParticle {
   y: number;
   vx: number;
   vy: number;
-  type: 'star' | 'circle' | 'sparkle';
-  rotation: number;
-  rotSpeed: number;
+  type: 'node' | 'signal';
 }
 
-interface AnimeShockwave {
+interface SignalWave {
   x: number;
   y: number;
   radius: number;
   maxRadius: number;
   alpha: number;
-  text?: string;
 }
 
 export default function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0);
   const [streamIndex, setStreamIndex] = useState(0);
   const [pillarIndex, setPillarIndex] = useState(0);
-  const [dialogIndex, setDialogIndex] = useState(0);
+  const [signalIndex, setSignalIndex] = useState(0);
   const [phase, setPhase] = useState<'running' | 'blast' | 'done'>('running');
   const [isVisible, setIsVisible] = useState(true);
   const [mouseCoords, setMouseCoords] = useState({ x: 0, y: 0 });
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
-  const [mascotMood, setMascotMood] = useState<'normal' | 'happy' | 'super'>('normal');
+  const [isCompact, setIsCompact] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [highPerformance, setHighPerformance] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const shockwavesRef = useRef<AnimeShockwave[]>([]);
+  const signalWavesRef = useRef<SignalWave[]>([]);
   const mousePosRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
+  const displayedProgressRef = useRef(-1);
 
   const handleFinish = useCallback(() => {
     setPhase('blast');
@@ -101,6 +101,32 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       setIsVisible(false);
     }, 550);
   }, [onComplete]);
+
+  useEffect(() => {
+    const compactQuery = window.matchMedia('(max-width: 640px)');
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncPreferences = () => {
+      const device = navigator as Navigator & {
+        deviceMemory?: number;
+        connection?: { saveData?: boolean };
+      };
+      setIsCompact(compactQuery.matches);
+      setReducedMotion(motionQuery.matches);
+      setHighPerformance(
+        !device.connection?.saveData &&
+          ((device.deviceMemory ?? 0) >= 8 ||
+            (!compactQuery.matches && navigator.hardwareConcurrency >= 8))
+      );
+    };
+
+    syncPreferences();
+    compactQuery.addEventListener('change', syncPreferences);
+    motionQuery.addEventListener('change', syncPreferences);
+    return () => {
+      compactQuery.removeEventListener('change', syncPreferences);
+      motionQuery.removeEventListener('change', syncPreferences);
+    };
+  }, []);
 
   // Keyboard shortcut: ESC or Space to skip instantly
   useEffect(() => {
@@ -113,13 +139,22 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     return () => window.removeEventListener('keydown', handleKey);
   }, [handleFinish]);
 
-  // Mouse move listener for live telemetry coordinates & pupil tracking
+  // Mouse position drives the live telemetry and background signal field.
   useEffect(() => {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    let lastStateUpdate = 0;
     const handleMouseMove = (e: MouseEvent) => {
       const { innerWidth, innerHeight } = window;
       const normX = (e.clientX - innerWidth / 2) / (innerWidth / 2);
       const normY = (e.clientY - innerHeight / 2) / (innerHeight / 2);
 
+      mousePosRef.current.targetX = e.clientX;
+      mousePosRef.current.targetY = e.clientY;
+
+      const now = performance.now();
+      if (now - lastStateUpdate < 50) return;
+      lastStateUpdate = now;
       setMouseCoords({
         x: Math.round(e.clientX),
         y: Math.round(e.clientY),
@@ -129,41 +164,40 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         x: normX * 8,
         y: normY * 4,
       });
-
-      mousePosRef.current.targetX = e.clientX;
-      mousePosRef.current.targetY = e.clientY;
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Click listener for interactive anime shockwaves & pop effects
+  // Click to send a signal wave through the product telemetry field.
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const comicWords = ['✦ POW! ✦', '★ SYNC! ★', '⚡ LEVEL UP! ⚡', '✦ 0-TO-1! ✦', '★ SUGOI! ★'];
-    const randomWord = comicWords[Math.floor(Math.random() * comicWords.length)];
-
-    shockwavesRef.current.push({
+    signalWavesRef.current.push({
       x: e.clientX,
       y: e.clientY,
       radius: 8,
       maxRadius: 260,
       alpha: 1,
-      text: randomWord,
     });
-
-    setMascotMood('happy');
-    setTimeout(() => setMascotMood('normal'), 800);
   };
 
   // Main 8.8s progression counter
   useEffect(() => {
     const start = performance.now();
+    const duration = reducedMotion
+      ? 1600
+      : highPerformance
+        ? 3000
+        : isCompact
+          ? 4200
+          : DURATION_MS;
+    const progressDuration = duration - (duration < DURATION_MS ? 100 : 250);
+    displayedProgressRef.current = -1;
     let frameId: number;
 
     const tick = (now: number) => {
       const elapsed = now - start;
-      const rawPct = Math.min(elapsed / (DURATION_MS - 250), 1);
+      const rawPct = Math.min(elapsed / progressDuration, 1);
 
       // Progressive 8.8-second kinetic curve:
       let eased: number;
@@ -175,7 +209,11 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         eased = 0.98 + ((rawPct - 0.92) / 0.08) * 0.02;
       }
 
-      setProgress(Math.min(eased * 100, 100));
+      const nextProgress = Math.min(Math.round(eased * 100), 100);
+      if (nextProgress !== displayedProgressRef.current) {
+        displayedProgressRef.current = nextProgress;
+        setProgress(nextProgress);
+      }
 
       const nextStream = Math.min(
         Math.floor(rawPct * TELEMETRY_STREAM.length),
@@ -183,7 +221,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       );
       setStreamIndex(nextStream);
 
-      if (elapsed >= DURATION_MS) {
+      if (elapsed >= duration) {
         handleFinish();
         return;
       }
@@ -193,7 +231,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
 
     frameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameId);
-  }, [handleFinish]);
+  }, [handleFinish, highPerformance, isCompact, reducedMotion]);
 
   // Pillar word reel cycler
   useEffect(() => {
@@ -203,18 +241,18 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     return () => clearInterval(interval);
   }, []);
 
-  // Anime mascot dialog cycler
+  // Rotate through product signals.
   useEffect(() => {
     const interval = setInterval(() => {
-      setDialogIndex((prev) => (prev + 1) % ANIME_MASCOT_DIALOGS.length);
+      setSignalIndex((prev) => (prev + 1) % PRODUCT_SIGNALS.length);
     }, 1800);
     return () => clearInterval(interval);
   }, []);
 
-  // Generative Anime Starfield & Fluid Particle Canvas
+  // Product data-point field with connected telemetry signals.
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || reducedMotion) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -233,11 +271,11 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     };
     window.addEventListener('resize', onResize);
 
-    const PARTICLE_COUNT = 90;
-    const particles: AnimeParticle[] = Array.from({ length: PARTICLE_COUNT }).map((_, i) => {
+    const PARTICLE_COUNT = isCompact ? 28 : 90;
+    const particles: ProductParticle[] = Array.from({ length: PARTICLE_COUNT }).map((_, i) => {
       const angle = (i / PARTICLE_COUNT) * Math.PI * 2;
       const radius = 120 + Math.random() * (Math.min(width, height) * 0.38);
-      const types: ('star' | 'circle' | 'sparkle')[] = ['star', 'circle', 'sparkle'];
+      const types: ProductParticle['type'][] = ['node', 'signal', 'node'];
       return {
         radius: radius,
         angle: angle,
@@ -249,38 +287,11 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         vx: 0,
         vy: 0,
         type: types[i % 3],
-        rotation: Math.random() * Math.PI * 2,
-        rotSpeed: (Math.random() - 0.5) * 0.04,
       };
     });
 
     let animationId: number;
     let scanY = 0;
-
-    // Helper to draw 4-point anime star
-    const drawAnimeStar = (cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number) => {
-      let rot = (Math.PI / 2) * 3;
-      let x = cx;
-      let y = cy;
-      const step = Math.PI / spikes;
-
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - outerRadius);
-      for (let i = 0; i < spikes; i++) {
-        x = cx + Math.cos(rot) * outerRadius;
-        y = cy + Math.sin(rot) * outerRadius;
-        ctx.lineTo(x, y);
-        rot += step;
-
-        x = cx + Math.cos(rot) * innerRadius;
-        y = cy + Math.sin(rot) * innerRadius;
-        ctx.lineTo(x, y);
-        rot += step;
-      }
-      ctx.lineTo(cx, cy - outerRadius);
-      ctx.closePath();
-      ctx.fill();
-    };
 
     const render = () => {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
@@ -295,7 +306,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       const cX = width / 2;
       const cY = height / 2;
 
-      // Mouse-reactive radiant anime aura bloom
+      // Mouse-reactive product signal glow
       const mouseGlow = ctx.createRadialGradient(mX, mY, 10, mX, mY, 320);
       mouseGlow.addColorStop(0, 'rgba(198, 255, 0, 0.11)');
       mouseGlow.addColorStop(0.4, 'rgba(0, 240, 255, 0.05)');
@@ -306,57 +317,45 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       // Center stage orbital glow
       const centerGlow = ctx.createRadialGradient(cX, cY, 20, cX, cY, 400);
       centerGlow.addColorStop(0, 'rgba(198, 255, 0, 0.07)');
-      centerGlow.addColorStop(0.5, 'rgba(255, 0, 128, 0.03)');
+      centerGlow.addColorStop(0.5, 'rgba(0, 240, 255, 0.025)');
       centerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = centerGlow;
       ctx.fillRect(0, 0, width, height);
 
-      // Process click anime shockwaves & comic text bursts
-      const shockwaves = shockwavesRef.current;
-      for (let sIdx = shockwaves.length - 1; sIdx >= 0; sIdx--) {
-        const sw = shockwaves[sIdx];
-        sw.radius += 8;
-        sw.alpha *= 0.94;
+      // Send click waves through the telemetry field.
+      const signalWaves = signalWavesRef.current;
+      for (let sIdx = signalWaves.length - 1; sIdx >= 0; sIdx--) {
+        const wave = signalWaves[sIdx];
+        wave.radius += 8;
+        wave.alpha *= 0.94;
 
-        // Expanding anime energy ring
-        ctx.strokeStyle = `rgba(198, 255, 0, ${sw.alpha * 0.8})`;
+        // Expanding signal ring
+        ctx.strokeStyle = `rgba(198, 255, 0, ${wave.alpha * 0.8})`;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        ctx.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Secondary cyan ring
-        ctx.strokeStyle = `rgba(0, 240, 255, ${sw.alpha * 0.5})`;
+        // Secondary signal ring
+        ctx.strokeStyle = `rgba(0, 240, 255, ${wave.alpha * 0.5})`;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(sw.x, sw.y, Math.max(sw.radius - 12, 0), 0, Math.PI * 2);
+        ctx.arc(wave.x, wave.y, Math.max(wave.radius - 12, 0), 0, Math.PI * 2);
         ctx.stroke();
 
-        // Comic burst text
-        if (sw.text && sw.alpha > 0.3) {
-          ctx.save();
-          ctx.font = 'bold 16px monospace';
-          ctx.fillStyle = `rgba(255, 255, 255, ${sw.alpha})`;
-          ctx.textAlign = 'center';
-          ctx.shadowColor = '#C6FF00';
-          ctx.shadowBlur = 12;
-          ctx.fillText(sw.text, sw.x, sw.y - sw.radius * 0.4);
-          ctx.restore();
-        }
-
-        // Repel particles on shockwave ring
+        // Displace nearby data points along the expanding signal.
         particles.forEach((p) => {
-          const sDx = p.x - sw.x;
-          const sDy = p.y - sw.y;
+          const sDx = p.x - wave.x;
+          const sDy = p.y - wave.y;
           const sDist = Math.sqrt(sDx * sDx + sDy * sDy);
-          if (Math.abs(sDist - sw.radius) < 40 && sDist > 0) {
-            p.vx += (sDx / sDist) * 5.5 * sw.alpha;
-            p.vy += (sDy / sDist) * 5.5 * sw.alpha;
+          if (Math.abs(sDist - wave.radius) < 40 && sDist > 0) {
+            p.vx += (sDx / sDist) * 5.5 * wave.alpha;
+            p.vy += (sDy / sDist) * 5.5 * wave.alpha;
           }
         });
 
-        if (sw.radius > sw.maxRadius || sw.alpha < 0.02) {
-          shockwaves.splice(sIdx, 1);
+        if (wave.radius > wave.maxRadius || wave.alpha < 0.02) {
+          signalWaves.splice(sIdx, 1);
         }
       }
 
@@ -369,10 +368,9 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       ctx.lineTo(width, scanY);
       ctx.stroke();
 
-      // Update & render particles (Anime stars, sparkles, circles)
+      // Update and render connected product data points.
       particles.forEach((p, idx) => {
         p.angle += p.angularSpeed;
-        p.rotation += p.rotSpeed;
 
         const targetX = cX + Math.cos(p.angle) * p.radius;
         const targetY = cY + Math.sin(p.angle) * p.radius;
@@ -397,24 +395,19 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
 
         ctx.save();
         ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
 
         const color =
-          idx % 3 === 0
+          idx % 2 === 0
             ? `rgba(0, 240, 255, ${p.alpha})`
-            : idx % 3 === 1
-            ? `rgba(198, 255, 0, ${p.alpha})`
-            : `rgba(255, 105, 180, ${p.alpha * 0.8})`;
+            : `rgba(198, 255, 0, ${p.alpha})`;
 
         ctx.fillStyle = color;
 
-        if (p.type === 'star') {
-          drawAnimeStar(0, 0, 4, p.size * 2, p.size * 0.7);
-        } else if (p.type === 'sparkle') {
-          drawAnimeStar(0, 0, 4, p.size * 2.5, p.size * 0.4);
+        if (p.type === 'signal') {
+          ctx.fillRect(-p.size, -p.size, p.size * 2, p.size * 2);
         } else {
           ctx.beginPath();
-          ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+          ctx.arc(0, 0, p.size * 1.3, 0, Math.PI * 2);
           ctx.fill();
         }
 
@@ -446,7 +439,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       cancelAnimationFrame(animationId);
       window.removeEventListener('resize', onResize);
     };
-  }, []);
+  }, [isCompact, reducedMotion]);
 
   if (!isVisible) return null;
 
@@ -469,7 +462,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         }}
         transition={{ duration: 0.55, ease: [0.87, 0, 0.13, 1] }}
         onClick={handleCanvasClick}
-        className="fixed inset-0 z-[99999] overflow-hidden bg-black select-none pointer-events-auto cursor-crosshair"
+        className="fixed inset-0 z-[99999] overflow-hidden bg-black select-none pointer-events-auto cursor-default sm:cursor-crosshair"
       >
         {/* Generative Interactive Canvas */}
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
@@ -484,7 +477,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
           }}
         />
 
-        {/* Manga Corner Halftone Dots Accent */}
+        {/* Product analytics grid markers */}
         <div
           className="absolute top-10 left-10 w-24 h-24 pointer-events-none opacity-20 hidden md:block"
           style={{
@@ -544,35 +537,35 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         <div className="absolute inset-0 pointer-events-none z-15 flex items-center justify-center">
           <div className="absolute w-36 h-px bg-white/10" />
           <div className="absolute h-36 w-px bg-white/10" />
-          <div className="absolute -top-8 -left-8 text-accent/40 text-xs font-mono">✦</div>
-          <div className="absolute -top-8 -right-8 text-accent/40 text-xs font-mono">✦</div>
-          <div className="absolute -bottom-8 -left-8 text-accent/40 text-xs font-mono">✦</div>
-          <div className="absolute -bottom-8 -right-8 text-accent/40 text-xs font-mono">✦</div>
+          <div className="absolute -top-8 -left-8 h-2 w-2 rounded-full border border-accent/40" />
+          <div className="absolute -top-8 -right-8 h-2 w-2 rounded-full border border-accent/40" />
+          <div className="absolute -bottom-8 -left-8 h-2 w-2 rounded-full border border-accent/40" />
+          <div className="absolute -bottom-8 -right-8 h-2 w-2 rounded-full border border-accent/40" />
         </div>
 
         {/* ============================================================== */}
         {/* MAIN HUD CONTENT LAYER                                         */}
         {/* ============================================================== */}
-        <div className="relative z-25 h-full w-full flex flex-col justify-between p-6 sm:p-10 pt-10 pb-10 text-white">
+        <div className="relative z-25 h-full w-full flex flex-col justify-between p-4 sm:p-10 pt-12 pb-12 text-white">
           {/* TOP TACTICAL CORNER BRACKETS & TELEMETRY */}
           <div className="flex items-start justify-between w-full">
             {/* Top-Left: System Telemetry */}
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-lg border border-accent/40 bg-accent/10 flex items-center justify-center text-accent shadow-[0_0_15px_rgba(198,255,0,0.25)]">
-                <Sparkles className="w-4 h-4 animate-spin text-accent" style={{ animationDuration: '6s' }} />
+                <Workflow className="w-4 h-4 text-accent" strokeWidth={1.7} />
               </div>
               <div className="flex flex-col font-mono">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
-                  <span className="text-xs font-bold tracking-widest text-accent uppercase">
-                    ✦ PRODUCT_OS // ANIME CALIBRATION
+                  <span className="max-w-[52vw] truncate text-[10px] font-bold tracking-[0.1em] text-accent uppercase sm:max-w-none sm:text-xs sm:tracking-widest">
+                    PRODUCT WORLD // INITIALIZING
                   </span>
                 </div>
-                <span className="text-[10px] text-white/50 tracking-wider">
+                <span className="hidden sm:block text-[10px] text-white/50 tracking-wider">
                   CANDIDATE: RISHABH RAI &middot; APM / PRODUCT SENSE
                 </span>
-                <span className="text-[9px] text-accent/70 tracking-widest uppercase">
-                  [ S-RANK PRODUCT SENSE ]
+                <span className="hidden sm:block text-[9px] text-accent/70 tracking-widest uppercase">
+                  [ PRODUCT STRATEGY // EXECUTION ]
                 </span>
               </div>
             </div>
@@ -598,153 +591,63 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
           </div>
 
           {/* ============================================================== */}
-          {/* CENTER STAGE WITH ANIME MASCOT                                  */}
+          {/* PRODUCT WORLD SIGNAL MONITOR                                   */}
           {/* ============================================================== */}
           <div className="relative my-auto flex items-center justify-center w-full">
-            {/* CENTER CORE: ANIME MASCOT + SPEEDOMETER + CONDENSED TITLE */}
             <div className="flex flex-col items-center justify-center text-center max-w-4xl px-2">
-              {/* ======================================================== */}
-              {/* INTERACTIVE ANIME CYBER CAT MASCOT (MEW.XYZ STYLE)       */}
-              {/* ======================================================== */}
               <div className="relative mb-3 flex flex-col items-center">
-                {/* Anime Comic Speech Bubble */}
                 <motion.div
-                  key={dialogIndex}
-                  initial={{ opacity: 0, y: 8, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.9 }}
-                  transition={{ duration: 0.25 }}
-                  className="mb-2 px-3 py-1 rounded-full border border-accent/40 bg-black/80 backdrop-blur-md shadow-[0_0_15px_rgba(198,255,0,0.25)] flex items-center gap-1.5"
+                  className="mb-2 inline-flex items-center gap-2 rounded-full border border-accent/25 bg-black/60 px-3 py-1.5 font-mono text-[9px] font-bold tracking-[0.16em] text-accent shadow-[0_0_20px_rgba(198,255,0,0.08)] sm:text-[10px]"
                 >
-                  <Sparkles className="w-3 h-3 text-accent animate-pulse" />
-                  <span className="text-[10px] sm:text-xs font-mono font-bold text-accent tracking-wider">
-                    {ANIME_MASCOT_DIALOGS[dialogIndex]}
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
                   </span>
+                  PRODUCT WORLD <span className="text-white/30">/</span> LIVE SIGNALS
                 </motion.div>
 
-                {/* Animated Cyber Anime Cat Face */}
                 <motion.div
-                  animate={{
-                    y: mascotMood === 'happy' ? [-8, 0, -8] : [-3, 3, -3],
-                    scale: mascotMood === 'happy' ? 1.15 : 1,
-                  }}
-                  transition={{
-                    y: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
-                    scale: { duration: 0.2 },
-                  }}
-                  className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center cursor-pointer group"
-                  title="Click to interact with the Product Mascot!"
+                  animate={{ y: [-2, 2, -2] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                  className="relative mb-2 flex h-[76px] w-[76px] items-center justify-center sm:h-[88px] sm:w-[88px]"
                 >
-                  {/* Aura Ring around Mascot */}
-                  <div className="absolute inset-0 rounded-full bg-accent/10 blur-md animate-pulse" />
-
-                  {/* SVG Anime Cyber Cat Character */}
-                  <svg
-                    viewBox="0 0 100 100"
-                    className="w-full h-full drop-shadow-[0_0_12px_rgba(198,255,0,0.6)]"
+                  <motion.div
+                    className="absolute inset-0 rounded-full border border-accent/30"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
                   >
-                    {/* Cat Ears */}
-                    <polygon
-                      points="18,38 32,10 46,32"
-                      fill="#0a0a0a"
-                      stroke="#C6FF00"
-                      strokeWidth="2.5"
-                    />
-                    <polygon points="24,32 32,18 40,28" fill="#C6FF00" opacity="0.6" />
-
-                    <polygon
-                      points="82,38 68,10 54,32"
-                      fill="#0a0a0a"
-                      stroke="#C6FF00"
-                      strokeWidth="2.5"
-                    />
-                    <polygon points="76,32 68,18 60,28" fill="#C6FF00" opacity="0.6" />
-
-                    {/* Cyber Head Base */}
-                    <circle
-                      cx="50"
-                      cy="55"
-                      r="36"
-                      fill="#0d0d11"
-                      stroke="#FFFFFF"
-                      strokeWidth="2.5"
-                    />
-
-                    {/* Cyber Headset Band & Ear Cups */}
-                    <path
-                      d="M 14,55 A 36,36 0 0,1 86,55"
-                      fill="none"
-                      stroke="#00f0ff"
-                      strokeWidth="2"
-                      strokeDasharray="4 2"
-                    />
-                    <rect x="10" y="48" width="6" height="14" rx="2" fill="#00f0ff" />
-                    <rect x="84" y="48" width="6" height="14" rx="2" fill="#00f0ff" />
-
-                    {/* Anime Eyes */}
-                    {mascotMood === 'happy' ? (
-                      // Excited anime happy eyes: > <
-                      <>
-                        <path
-                          d="M 30,50 L 40,54 L 30,58"
-                          fill="none"
-                          stroke="#C6FF00"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M 70,50 L 60,54 L 70,58"
-                          fill="none"
-                          stroke="#C6FF00"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </>
-                    ) : (
-                      // Big expressive anime eyes with tracking pupils
-                      <>
-                        <ellipse cx="36" cy="53" rx="8" ry="11" fill="#000000" stroke="#C6FF00" strokeWidth="2" />
-                        <ellipse cx="64" cy="53" rx="8" ry="11" fill="#000000" stroke="#C6FF00" strokeWidth="2" />
-
-                        {/* Pupils with mouse tracking */}
-                        <circle
-                          cx={36 + Math.min(Math.max(mouseOffset.x * 0.3, -3), 3)}
-                          cy={53 + Math.min(Math.max(mouseOffset.y * 0.4, -3), 3)}
-                          r="5.5"
-                          fill="#C6FF00"
-                        />
-                        <circle
-                          cx={64 + Math.min(Math.max(mouseOffset.x * 0.3, -3), 3)}
-                          cy={53 + Math.min(Math.max(mouseOffset.y * 0.4, -3), 3)}
-                          r="5.5"
-                          fill="#C6FF00"
-                        />
-
-                        {/* Glossy anime specular highlights */}
-                        <circle cx="34" cy="49" r="2.2" fill="#FFFFFF" />
-                        <circle cx="38" cy="55" r="1.2" fill="#FFFFFF" />
-                        <circle cx="62" cy="49" r="2.2" fill="#FFFFFF" />
-                        <circle cx="66" cy="55" r="1.2" fill="#FFFFFF" />
-                      </>
-                    )}
-
-                    {/* Cute Nose & Mouth: :3 */}
-                    <polygon points="50,62 48,65 52,65" fill="#FF69B4" />
-                    <path
-                      d="M 46,67 Q 50,71 50,67 Q 50,71 54,67"
-                      fill="none"
-                      stroke="#FFFFFF"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                    />
-
-                    {/* Anime Cheek Blush */}
-                    <ellipse cx="27" cy="62" rx="4" ry="2" fill="#FF69B4" opacity="0.6" />
-                    <ellipse cx="73" cy="62" rx="4" ry="2" fill="#FF69B4" opacity="0.6" />
-                  </svg>
+                    <span className="absolute left-1/2 top-[-3px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-accent shadow-[0_0_10px_var(--accent)]" />
+                  </motion.div>
+                  <motion.div
+                    className="absolute inset-[7px] rounded-full border border-dashed border-cyan-300/25"
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
+                  />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/30 bg-[#0b1110] text-accent shadow-[0_0_28px_rgba(198,255,0,0.16)] sm:h-12 sm:w-12">
+                    <Workflow className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={1.6} />
+                  </div>
                 </motion.div>
+
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={signalIndex}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="font-mono text-[9px] font-semibold tracking-[0.14em] text-white/55 sm:text-[10px]"
+                  >
+                    {PRODUCT_SIGNALS[signalIndex]}
+                  </motion.span>
+                </AnimatePresence>
+
+                <div className="mt-3 flex items-center gap-2 text-[8px] font-mono font-bold tracking-[0.14em] text-white/35 sm:text-[9px]">
+                  <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">DISCOVER</span>
+                  <span className="h-px w-3 bg-accent/40" />
+                  <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">DEFINE</span>
+                  <span className="h-px w-3 bg-accent/40" />
+                  <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">DELIVER</span>
+                </div>
               </div>
 
               {/* Speedometer Ring & Percentage Counter */}
@@ -797,7 +700,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                     {String(displayCount).padStart(3, '0')}
                   </span>
                   <span className="text-[9px] font-mono text-accent uppercase font-bold tracking-widest mt-0.5">
-                    % CHARGED
+                    % READY
                   </span>
                 </div>
               </div>
@@ -814,7 +717,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
               {/* Monumental Chromatic Aberration Typography */}
               <div className="relative select-none my-1">
                 <h1
-                  className="font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-9xl uppercase tracking-tighter leading-none text-cyan-400 opacity-60 absolute inset-0 blur-[1px] pointer-events-none transition-transform duration-75"
+                  className="absolute inset-0 hidden font-display font-black text-7xl uppercase leading-none tracking-tighter text-accent opacity-20 blur-[1px] pointer-events-none transition-transform duration-75 sm:block md:text-8xl lg:text-9xl"
                   style={{
                     transform: `translate(${-mouseOffset.x - 3}px, ${-mouseOffset.y - 1}px)`,
                   }}
@@ -823,7 +726,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                 </h1>
 
                 <h1
-                  className="font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-9xl uppercase tracking-tighter leading-none text-rose-500 opacity-60 absolute inset-0 blur-[1px] pointer-events-none transition-transform duration-75"
+                  className="absolute inset-0 hidden font-display font-black text-7xl uppercase leading-none tracking-tighter text-cyan-300 opacity-15 blur-[1px] pointer-events-none transition-transform duration-75 sm:block md:text-8xl lg:text-9xl"
                   style={{
                     transform: `translate(${mouseOffset.x + 3}px, ${mouseOffset.y + 1}px)`,
                   }}
@@ -831,7 +734,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                   {NAME_FIRST} {NAME_LAST}
                 </h1>
 
-                <h1 className="relative font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-9xl uppercase tracking-tighter leading-none text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]">
+                <h1 className="relative font-display font-black text-[clamp(1.8rem,9vw,3rem)] sm:text-7xl md:text-8xl lg:text-9xl uppercase tracking-tighter leading-none text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]">
                   {NAME_FIRST}{' '}
                   <span className="text-accent italic drop-shadow-[0_0_40px_rgba(198,255,0,0.7)]">
                     {NAME_LAST}
@@ -855,15 +758,19 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                 </div>
 
                 {/* Milestone Checkpoints */}
-                <div className="w-full flex justify-between text-[9px] font-mono text-white/40 tracking-wider">
+                <div className="w-full flex justify-between font-mono text-[8px] tracking-normal text-white/50 sm:text-[9px] sm:tracking-wider">
                   {MILESTONES.map((m, i) => (
                     <span
                       key={i}
-                      className={`transition-colors duration-200 ${
+                      className={`flex flex-col items-center gap-0.5 transition-colors duration-200 sm:block ${
                         progress >= m.threshold ? 'text-accent font-bold' : ''
                       }`}
                     >
-                      [{i + 1}] {m.label}
+                      <span className="sm:hidden">[{i + 1}]</span>
+                      <span className="sm:hidden">{m.shortLabel}</span>
+                      <span className="hidden sm:inline">
+                        [{i + 1}] {m.label}
+                      </span>
                     </span>
                   ))}
                 </div>
@@ -895,7 +802,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
           {/* ============================================================== */}
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 font-mono text-xs">
             {/* Live Data Telemetry Waveform + Stream */}
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex gap-1 items-end h-5 px-2 py-1 rounded bg-white/[0.03] border border-white/10">
                 {[35, 75, 45, 100, 60, 85, 40, 95, 55, 70, 90, 50].map((h, i) => (
                   <motion.span
@@ -913,28 +820,28 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
                 ))}
               </div>
 
-              <div className="flex flex-col">
+              <div className="flex min-w-0 flex-col">
                 <div className="flex items-center gap-1.5 text-[10px] text-white/40 uppercase tracking-widest">
                   <Terminal className="w-3 h-3 text-accent" />
                   <span>Real-time Telemetry Stream</span>
                 </div>
-                <span className="text-accent text-[11px] font-bold tracking-wider">
+                <span className="block max-w-[70vw] truncate text-accent text-[9px] sm:max-w-none sm:text-[11px] font-bold tracking-wider">
                   &gt; {TELEMETRY_STREAM[streamIndex]}
                 </span>
               </div>
             </div>
 
-            {/* GPS Coordinates & Interactive Anime Hint */}
-            <div className="text-left sm:text-right text-[10px] text-white/40 tracking-wider font-mono">
+            {/* Product framework and interaction hint */}
+            <div className="hidden sm:block text-left sm:text-right text-[10px] text-white/40 tracking-wider font-mono">
               <div className="flex items-center sm:justify-end gap-1.5 text-white/60">
-                <Sparkles className="w-3 h-3 text-accent" />
-                <span>KIIT UNIVERSITY &middot; B.TECH ECS &apos;27</span>
+                <Activity className="w-3 h-3 text-accent" />
+                <span>DISCOVERY &middot; PRODUCT STRATEGY &middot; GTM</span>
               </div>
               <span className="text-accent/80 font-bold">
-                [ LAT 20.3533&deg; N // LON 85.8178&deg; E ]
+                [ CUSTOMER SIGNALS // PRODUCT OUTCOMES ]
               </span>
               <br />
-              <span className="text-white/40">CLICK SCREEN FOR ANIME SHOCKWAVE &middot; ESC TO ENTER</span>
+              <span className="text-white/40">CLICK TO TRACE A SIGNAL &middot; ESC TO ENTER</span>
             </div>
           </div>
         </div>

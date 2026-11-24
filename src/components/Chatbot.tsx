@@ -29,6 +29,7 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showLauncher, setShowLauncher] = useState(false);
+  const [cardsVisible, setCardsVisible] = useState(false);
 
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -46,6 +47,45 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
     if (!listRef.current) return;
     listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>('#hero-metrics, #about .grid > *')
+    );
+    if (cards.length === 0) return;
+
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
+    const visibleCards = new Set<HTMLElement>();
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!(entry.target instanceof HTMLElement)) return;
+        if (entry.isIntersecting) {
+          visibleCards.add(entry.target);
+        } else {
+          visibleCards.delete(entry.target);
+        }
+      });
+      setCardsVisible(mobileQuery.matches && visibleCards.size > 0);
+    });
+    cards.forEach((card) => observer.observe(card));
+
+    const syncVisibility = () => {
+      visibleCards.clear();
+      cards.forEach((card) => {
+        const bounds = card.getBoundingClientRect();
+        if (bounds.top < window.innerHeight && bounds.bottom > 0) {
+          visibleCards.add(card);
+        }
+      });
+      setCardsVisible(mobileQuery.matches && visibleCards.size > 0);
+    };
+    window.addEventListener('resize', syncVisibility);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', syncVisibility);
+    };
+  }, []);
 
   const sendMessage = (rawText: string) => {
     const text = rawText.trim();
@@ -102,7 +142,7 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
 
   return (
     <AnimatePresence>
-      {showLauncher && (
+      {showLauncher && (!cardsVisible || isOpen) && (
         <motion.div
           className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[120]"
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -116,7 +156,7 @@ export default function Chatbot({ isLoading = false }: ChatbotProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.25 }}
-              className="mb-3 w-[92vw] max-w-[420px] h-[520px] sm:h-[580px] rounded-[28px] border border-white/[0.12] bg-[#161617]/95 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col"
+              className="mb-3 w-[92vw] max-w-[420px] h-[min(520px,calc(100dvh_-_7rem))] sm:h-[580px] rounded-[28px] border border-white/[0.12] bg-[#161617]/95 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col"
             >
               {/* Apple Intelligence Style Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08] bg-black/40">

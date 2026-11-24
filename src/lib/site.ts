@@ -8,7 +8,7 @@ export const SITE = {
   role: 'Product Manager',
   title: 'Rishabh Rai — Product Management, Product Sense & GTM',
   description:
-    'Product enthusiast working on payment categorisation at Fineye and KYC/KYB verification at BeFiSc, with experience in product discovery, user research, and analytics-led decision making. Built AI-enabled workflows using LLM APIs.',
+    'Product management across fintech, payment categorisation, KYC/KYB verification, discovery, analytics, and AI-enabled workflows.',
   url: SITE_URL,
   email: 'rishabhraittt@gmail.com',
   phone: '+91 6000032216',

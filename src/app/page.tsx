@@ -27,7 +27,7 @@ export default function Home() {
         className="relative min-h-screen bg-background w-full overflow-x-hidden selection:bg-accent selection:text-black transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
           opacity: isLoading ? 0.2 : 1,
-          transform: isLoading ? 'scale(0.98)' : 'scale(1)',
+          transform: isLoading ? 'scale(0.98)' : 'none',
           pointerEvents: isLoading ? 'none' : 'auto',
         }}
       >

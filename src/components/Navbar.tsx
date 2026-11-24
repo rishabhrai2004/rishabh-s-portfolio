@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { ArrowUpRight, Menu, X } from 'lucide-react';
 
 const links = [
   { name: 'Approach', href: '#about' },
@@ -101,6 +101,8 @@ export default function Navbar() {
             className="md:hidden text-white z-[160] p-2 hover:text-accent transition-colors"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -110,50 +112,92 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, clipPath: 'circle(0% at 100% 0)' }}
-            animate={{ opacity: 1, clipPath: 'circle(150% at 100% 0)' }}
-            exit={{ opacity: 0, clipPath: 'circle(0% at 100% 0)' }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[145] bg-[#030712] flex flex-col justify-center items-center p-6"
+          <motion.nav
+            id="mobile-menu"
+            aria-label="Mobile navigation"
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-[145] h-dvh overflow-y-auto bg-[#030712]"
+            style={{
+              paddingTop: 'env(safe-area-inset-top)',
+              paddingBottom: 'env(safe-area-inset-bottom)',
+            }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_75%_30%,rgba(198,255,0,0.09),transparent_38%),linear-gradient(155deg,#07100e_0%,#030712_58%,#070915_100%)]" />
+            <div className="absolute inset-0 pointer-events-none opacity-[0.12] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
 
-            <ul className="flex flex-col items-center gap-7 relative z-10 w-full max-w-xs">
-              {links.map((link, idx) => (
+            <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-2xl flex-col justify-center px-7 pb-24 pt-24 sm:px-12">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.08 }}
+                className="mb-5 flex items-center justify-between border-b border-white/10 pb-4"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent">
+                  Navigate
+                </span>
+                <span className="font-mono text-[10px] tracking-[0.18em] text-white/35">
+                  INDEX&nbsp; / &nbsp;01—05
+                </span>
+              </motion.div>
+
+              <ul className="relative w-full">
+                {links.map((link, idx) => (
                 <motion.li
                   key={link.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.08 * idx + 0.2 }}
-                  className="w-full text-center"
+                  initial={{ opacity: 0, x: -18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.35, delay: 0.1 + idx * 0.055, ease: [0.16, 1, 0.3, 1] }}
+                  className="border-b border-white/[0.08]"
                 >
                   <a
                     href={link.href}
                     onClick={closeMenu}
-                    className="block text-white hover:text-accent font-display italic text-4xl sm:text-5xl transition-all duration-400 hover:tracking-wider"
+                    className="group flex min-h-[66px] items-center gap-5 py-3 text-white transition-colors duration-300 hover:text-accent focus-visible:text-accent"
                   >
-                    {link.name}
+                    <span className="w-7 shrink-0 font-mono text-[10px] tracking-wider text-white/35 transition-colors group-hover:text-accent/70">
+                      0{idx + 1}
+                    </span>
+                    <span className="flex-1 font-display text-[clamp(1.75rem,7vw,2.6rem)] font-medium tracking-tight">
+                      {link.name}
+                    </span>
+                    <ArrowUpRight className="h-5 w-5 shrink-0 -translate-x-1 translate-y-1 text-accent opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100" />
                   </a>
                 </motion.li>
               ))}
+              </ul>
 
-              <motion.li
-                initial={{ opacity: 0, y: 20 }}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.55 }}
-                className="mt-8 flex flex-col items-center gap-3.5 w-full"
+                transition={{ duration: 0.35, delay: 0.42 }}
+                className="mt-7 flex items-center justify-between gap-4"
               >
                 <a
                   href="#projects"
                   onClick={closeMenu}
-                  className="w-full py-3.5 text-center bg-accent text-black text-xs uppercase tracking-[0.2em] font-bold rounded-full hover:bg-white transition-all shadow-[0_0_30px_var(--accent-muted)]"
+                  className="btn-shine inline-flex min-h-12 flex-1 items-center justify-between rounded-full border border-accent/60 bg-accent px-5 text-[10px] font-bold uppercase tracking-[0.18em] text-black shadow-[0_0_32px_var(--accent-muted)] transition-all hover:scale-[1.02] hover:bg-white sm:flex-none sm:gap-8"
                 >
-                  Explore Work
+                  <span className="relative z-[2]">Explore selected work</span>
+                  <ArrowUpRight className="relative z-[2] h-4 w-4" />
                 </a>
-              </motion.li>
-            </ul>
-          </motion.div>
+                <span className="hidden text-right text-[9px] font-semibold uppercase leading-relaxed tracking-[0.16em] text-white/35 sm:block">
+                  Product sense<br />&amp; strategy
+                </span>
+              </motion.div>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-7 text-[9px] font-mono uppercase tracking-[0.2em] text-white/30"
+              >
+                Rishabh Rai <span className="px-1.5 text-accent/70">/</span> Product management · GTM
+              </motion.p>
+            </div>
+          </motion.nav>
         )}
       </AnimatePresence>
     </>
